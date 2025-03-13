@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ComponentCategory {
+  CPU
+  GPU
+  MOTHERBOARD
+  RAM
+  STORAGE
+  COOLER
+  PSU
+  CASE
+}
+
+model Post {
+  id        String      @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  Int?
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
+}
+
+model Product {
+  id        String            @id @default(cuid())
+  name      String
+  price     Float
+  stock     Int
+  category  ComponentCategory
+  cpuSpec   CpuSpec?         @relation(fields: [cpuSpecId], references: [id])
+  gpuSpec   GpuSpec?         @relation(fields: [gpuSpecId], references: [id])
+  ramSpec   RamSpec?         @relation(fields: [ramSpecId], references: [id])
+  storageSpec StorageSpec?   @relation(fields: [storageSpecId], references: [id])
+  motherboardSpec MotherboardSpec? @relation(fields: [motherboardSpecId], references: [id])
+  psuSpec   PsuSpec?         @relation(fields: [psuSpecId], references: [id])
+  caseSpec  CaseSpec?        @relation(fields: [caseSpecId], references: [id])
+  coolerSpec CoolerSpec?     @relation(fields: [coolerSpecId], references: [id])
+  cpuSpecId String?
+  gpuSpecId String?
+  ramSpecId String?
+  storageSpecId String?
+  motherboardSpecId String?
+  psuSpecId String?
+  caseSpecId String?
+  coolerSpecId String?
+  updatedAt DateTime         @updatedAt
+  createdAt DateTime         @default(now())
+}
+
+model CpuSpec {
+  id            String    @id @default(cuid())
+  brand         String
+  cores         Int
+  threads       Int
+  baseSpeed     Float
+  boostSpeed    Float?
+  socket        String
+  tdp          Int
+  products     Product[]
+}
+
+model GpuSpec {
+  id            String    @id @default(cuid())
+  brand         String
+  memory        Int
+  memoryType    String
+  coreClock     Float
+  boostClock    Float?
+  tdp          Int
+  products     Product[]
+}
+
+model RamSpec {
+  id            String    @id @default(cuid())
+  capacity      Int
+  speed         Int
+  type          String
+  timing        String
+  products     Product[]
+}
+
+model StorageSpec {
+  id            String    @id @default(cuid())
+  type          String    // SSD or HDD
+  capacity      Int
+  interface     String
+  readSpeed     Int?
+  writeSpeed    Int?
+  products     Product[]
+}
+
+model MotherboardSpec {
+  id            String    @id @default(cuid())
+  socket        String
+  chipset       String
+  formFactor    String
+  memoryMax     Int
+  memorySlots   Int
+  products     Product[]
+}
+
+model PsuSpec {
+  id            String    @id @default(cuid())
+  wattage       Int
+  efficiency    String
+  modular       Boolean
+  products     Product[]
+}
+
+model CaseSpec {
+  id            String    @id @default(cuid())
+  formFactor    String
+  maxGpuLength  Int
+  maxCpuHeight  Int
+  products     Product[]
+}
+
+model CoolerSpec {
+  id            String    @id @default(cuid())
+  type          String    // Air or Liquid
+  height        Int       // In millimeters
+  radiatorSize  Int?      // In millimeters (for liquid coolers)
+  fanSize       Int       // In millimeters
+  fanCount      Int
+  tdp           Int       // Maximum TDP support in watts
+  socket        String    // Supported CPU sockets
+  products     Product[]
+}
