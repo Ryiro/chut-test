@@ -917,26 +917,28 @@ export default function AdminPage() {
                    )}
                    {imagePreview && (
                    <div className="relative w-40 h-40">
-                   <Image
-                   src={imagePreview}
-                   alt="Product preview"
-                   className="object-contain w-full h-full rounded-lg border"
-                   />
-                   <button
-                   type="button"
-                   onClick={() => {
-                      setImagePreview(null);
-                      setFormData(prev => ({ ...prev, image: '' }));
-                      if (fileInputRef.current) {
-                        fileInputRef.current.value = '';
-                      }
-                    }}
-                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                   >
-                   ✕
-                   </button>
-                  </div>
-                  )}
+                     <Image
+                       src={imagePreview}
+                       alt="Product preview"
+                       width={160}
+                       height={160}
+                       className="object-contain rounded-lg border"
+                     />
+                     <button
+                       type="button"
+                       onClick={() => {
+                          setImagePreview(null);
+                          setFormData(prev => ({ ...prev, image: '' }));
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = '';
+                          }
+                        }}
+                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                     >
+                       ✕
+                     </button>
+                   </div>
+                   )}
                 </div>
               </div>
 
@@ -998,7 +1000,9 @@ export default function AdminPage() {
                         <Image
                           src={product.image}
                           alt={product.name}
-                          className="w-full h-full object-contain rounded-md"
+                          width={96}
+                          height={96}
+                          className="object-contain rounded-md"
                         />
                       </div>
                     ) : (

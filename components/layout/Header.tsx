@@ -10,7 +10,7 @@ export default function Header() {
   const { theme, setTheme } = useTheme()
   
   return (
-    <header className="bg-background sticky top-0 z-50 w-full border-b border-border/40 backdrop-blur">
+    <header className="bg-[#1a365d] dark:bg-[#1e3a5f] sticky top-0 z-50 w-full border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-[#1a365d]/80 dark:supports-[backdrop-filter]:bg-[#1e3a5f]/80">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center">
@@ -24,7 +24,7 @@ export default function Header() {
               strokeWidth="2" 
               strokeLinecap="round" 
               strokeLinejoin="round" 
-              className="text-primary h-8 w-8"
+              className="text-white h-8 w-8"
             >
               <rect width="18" height="18" x="3" y="3" rx="2" />
               <path d="M4 9h16" />
@@ -36,15 +36,15 @@ export default function Header() {
               <path d="M10 17h.01" />
               <path d="M4 4v16" />
             </svg>
-            <span className="ml-2 text-xl font-bold">ComputerHut</span>
+            <span className="ml-2 text-xl font-bold text-white">ComputerHut</span>
           </Link>
         </div>
         
         <nav className="hidden md:flex items-center gap-6">
-          <Link href="/" className="text-foreground/70 hover:text-foreground text-sm font-medium transition-colors">Home</Link>
-          <Link href="/products" className="text-foreground/70 hover:text-foreground text-sm font-medium transition-colors">Products</Link>
-          <Link href="/about" className="text-foreground/70 hover:text-foreground text-sm font-medium transition-colors">About</Link>
-          <Link href="/support" className="text-foreground/70 hover:text-foreground text-sm font-medium transition-colors">Support</Link>
+          <Link href="/" className="text-white/80 hover:text-white text-sm font-medium transition-colors">Home</Link>
+          <Link href="/products" className="text-white/80 hover:text-white text-sm font-medium transition-colors">Products</Link>
+          <Link href="/about" className="text-white/80 hover:text-white text-sm font-medium transition-colors">About</Link>
+          <Link href="/support" className="text-white/80 hover:text-white text-sm font-medium transition-colors">Support</Link>
         </nav>
         
         <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export default function Header() {
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="mr-2"
+            className="mr-2 text-white hover:bg-white/10"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -92,13 +92,13 @@ export default function Header() {
             </svg>
             <span className="sr-only">Toggle theme</span>
           </Button>
-          <Button asChild variant="default" className="hidden md:inline-flex">
+          <Button asChild variant="secondary" className="hidden md:inline-flex">
             <Link href="/custom-build">
               Build Your PC
             </Link>
           </Button>
           
-          <Button variant="outline" size="icon" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-white/10" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -135,13 +135,13 @@ export default function Header() {
       </div>
       
       {/* Mobile menu */}
-      <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:hidden p-4 border-t border-border/40 w-full`}>
+      <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:hidden p-4 border-t border-white/10 w-full bg-[#1a365d] dark:bg-[#1e3a5f]`}>
         <div className="flex flex-col space-y-3">
-          <Link href="/" className="text-foreground/70 hover:text-foreground text-sm font-medium transition-colors">Home</Link>
-          <Link href="/products" className="text-foreground/70 hover:text-foreground text-sm font-medium transition-colors">Products</Link>
-          <Link href="/about" className="text-foreground/70 hover:text-foreground text-sm font-medium transition-colors">About</Link>
-          <Link href="/support" className="text-foreground/70 hover:text-foreground text-sm font-medium transition-colors">Support</Link>
-          <Button asChild variant="default" className="w-full">
+          <Link href="/" className="text-white/80 hover:text-white text-sm font-medium transition-colors">Home</Link>
+          <Link href="/products" className="text-white/80 hover:text-white text-sm font-medium transition-colors">Products</Link>
+          <Link href="/about" className="text-white/80 hover:text-white text-sm font-medium transition-colors">About</Link>
+          <Link href="/support" className="text-white/80 hover:text-white text-sm font-medium transition-colors">Support</Link>
+          <Button asChild variant="secondary" className="w-full">
             <Link href="/custom-build">
               Build Your PC
             </Link>
