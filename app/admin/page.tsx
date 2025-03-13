@@ -742,17 +742,32 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="p-8 min-h-screen">
+    <div className="p-8 min-h-screen max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
       <Tabs defaultValue="add" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="add">Add Product</TabsTrigger>
-          <TabsTrigger value="search">Search Products</TabsTrigger>
-          <TabsTrigger value="users">User Information</TabsTrigger>
+        <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 h-14 items-center mb-8 bg-gray-100 dark:bg-gray-800 p-1.5 rounded-lg">
+          <TabsTrigger 
+            value="add" 
+            className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-950 data-[state=active]:shadow-sm h-11 hover:bg-white/90 dark:hover:bg-gray-950/90 transition-colors"
+          >
+            Add Product
+          </TabsTrigger>
+          <TabsTrigger 
+            value="search" 
+            className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-950 data-[state=active]:shadow-sm h-11 hover:bg-white/90 dark:hover:bg-gray-950/90 transition-colors"
+          >
+            Search Products
+          </TabsTrigger>
+          <TabsTrigger 
+            value="users" 
+            className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-950 data-[state=active]:shadow-sm h-11 hover:bg-white/90 dark:hover:bg-gray-950/90 transition-colors"
+          >
+            User Information
+          </TabsTrigger>
         </TabsList>
 
         {/* Add Product Section */}
-        <TabsContent value="add">
+        <TabsContent value="add" className="max-w-4xl mx-auto">
           <Card className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
@@ -820,7 +835,7 @@ export default function AdminPage() {
         </TabsContent>
 
         {/* Search Products Section */}
-        <TabsContent value="search">
+        <TabsContent value="search" className="max-w-4xl mx-auto">
           <Card className="p-6">
             <div className="space-y-6">
               <div className="space-y-2">
@@ -878,7 +893,7 @@ export default function AdminPage() {
         </TabsContent>
 
         {/* User Information Section */}
-        <TabsContent value="users">
+        <TabsContent value="users" className="max-w-4xl mx-auto">
           <Card className="p-6">
             <div className="flex items-center justify-center h-[200px] text-gray-500">
               Coming Soon
