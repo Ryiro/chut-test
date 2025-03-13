@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -12,6 +12,95 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ComponentCategory } from '@prisma/client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+interface Spec {
+  id: string;
+  products: Product[];
+}
+
+interface CpuSpec extends Spec {
+  brand: string;
+  cores: number;
+  threads: number;
+  baseSpeed: number;
+  boostSpeed?: number;
+  socket: string;
+  tdp: number;
+}
+
+interface GpuSpec extends Spec {
+  brand: string;
+  memory: number;
+  memoryType: string;
+  coreClock: number;
+  boostClock?: number;
+  tdp: number;
+}
+
+interface RamSpec extends Spec {
+  capacity: number;
+  speed: number;
+  type: string;
+  timing: string;
+}
+
+interface StorageSpec extends Spec {
+  type: string;
+  capacity: number;
+  interface: string;
+  readSpeed?: number;
+  writeSpeed?: number;
+}
+
+interface MotherboardSpec extends Spec {
+  socket: string;
+  chipset: string;
+  formFactor: string;
+  memoryMax: number;
+  memorySlots: number;
+}
+
+interface PsuSpec extends Spec {
+  wattage: number;
+  efficiency: string;
+  modular: boolean;
+}
+
+interface CaseSpec extends Spec {
+  formFactor: string;
+  maxGpuLength: number;
+  maxCpuHeight: number;
+}
+
+interface CoolerSpec extends Spec {
+  type: string;
+  height: number;
+  radiatorSize?: number;
+  fanSize: number;
+  fanCount: number;
+  tdp: number;
+  socket: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  category: ComponentCategory;
+  cpuSpec?: CpuSpec;
+  gpuSpec?: GpuSpec;
+  ramSpec?: RamSpec;
+  storageSpec?: StorageSpec;
+  motherboardSpec?: MotherboardSpec;
+  psuSpec?: PsuSpec;
+  caseSpec?: CaseSpec;
+  coolerSpec?: CoolerSpec;
+  updatedAt: string;
+  createdAt: string;
+}
 
 const ComponentTypes = {
   CPU: 'CPU',
@@ -64,6 +153,62 @@ export default function AdminPage() {
       fanSize: '',
     }
   });
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    async (query: string) => {
+      if (query.length >= 3) {
+        setIsSearching(true);
+        setSearchError(null);
+        try {
+          const response = await fetch(`/api/products/search?q=${encodeURIComponent(query)}`);
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to search products');
+          }
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          if (!Array.isArray(data)) {
+            throw new Error('Invalid response format');
+          }
+
+          setSearchResults(data);
+        } catch (error) {
+          console.error('Error searching products:', error);
+          setSearchError(error instanceof Error ? error.message : 'Error searching products');
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    },
+    []
+  );
+
+  // Handle search input change with debouncing
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    
+    // Clear the previous timeout
+    const timeoutId = setTimeout(() => {
+      debouncedSearch(query);
+    }, 300); // 300ms delay
+
+    // Cleanup on unmount or next change
+    return () => clearTimeout(timeoutId);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -597,72 +742,150 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Admin - Add Product</h1>
-      <Card className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label>Category</Label>
-            <Select
-              value={category}
-              onValueChange={(value: keyof typeof ComponentTypes) => setCategory(value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(ComponentTypes).map(([key, value]) => (
-                  <SelectItem key={key} value={value}>
-                    {key}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+    <div className="p-8 min-h-screen">
+      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+      <Tabs defaultValue="add" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="add">Add Product</TabsTrigger>
+          <TabsTrigger value="search">Search Products</TabsTrigger>
+          <TabsTrigger value="users">User Information</TabsTrigger>
+        </TabsList>
 
-          <div className="space-y-2">
-            <Label>Product Name</Label>
-            <Input
-              type="text"
-              value={formData.name}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(e, 'name')}
-              required
-            />
-          </div>
+        {/* Add Product Section */}
+        <TabsContent value="add">
+          <Card className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={category}
+                  onValueChange={(value: keyof typeof ComponentTypes) => setCategory(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(ComponentTypes).map(([key, value]) => (
+                      <SelectItem key={key} value={value}>
+                        {key}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Price</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(e, 'price')}
-                required
-              />
+              <div className="space-y-2">
+                <Label>Product Name</Label>
+                <Input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(e, 'name')}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Price</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(e, 'price')}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Stock</Label>
+                  <Input
+                    type="number"
+                    value={formData.stock}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(e, 'stock')}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Specifications</h3>
+                {renderSpecFields()}
+              </div>
+
+              <Button type="submit" className="w-full">
+                Add Product
+              </Button>
+            </form>
+          </Card>
+        </TabsContent>
+
+        {/* Search Products Section */}
+        <TabsContent value="search">
+          <Card className="p-6">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label>Search Query</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    placeholder="Type 3 or more characters to search..."
+                  />
+                </div>
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label>Stock</Label>
-              <Input
-                type="number"
-                value={formData.stock}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(e, 'stock')}
-                required
-              />
+            
+            <div className="mt-4 space-y-4">
+              {searchError && (
+                <div className="text-sm text-red-500 mb-4">
+                  {searchError}
+                </div>
+              )}
+              {isSearching && (
+                <div className="text-sm text-gray-500">
+                  Searching...
+                </div>
+              )}
+              {!isSearching && searchQuery.length < 3 && (
+                <div className="text-sm text-gray-500">
+                  Type at least 3 characters to search
+                </div>
+              )}
+              {!isSearching && searchQuery.length >= 3 && Array.isArray(searchResults) && searchResults.length === 0 && !searchError && (
+                <div className="text-sm text-gray-500">
+                  No products found
+                </div>
+              )}
+              {Array.isArray(searchResults) && searchResults.map((product) => (
+                <Card key={product.id} className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium">{product.name}</h3>
+                      <p className="text-sm text-gray-500">Category: {product.category}</p>
+                      <p className="text-sm">Price: ${product.price.toFixed(2)}</p>
+                      <p className="text-sm">Stock: {product.stock}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">Edit</Button>
+                      <Button variant="destructive" size="sm">Delete</Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
-          </div>
+          </Card>
+        </TabsContent>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Specifications</h3>
-            {renderSpecFields()}
-          </div>
-
-          <Button type="submit" className="w-full">
-            Add Product
-          </Button>
-        </form>
-      </Card>
+        {/* User Information Section */}
+        <TabsContent value="users">
+          <Card className="p-6">
+            <div className="flex items-center justify-center h-[200px] text-gray-500">
+              Coming Soon
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
