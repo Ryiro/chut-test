@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, ChangeEvent, useCallback } from 'react';
+import React, { useState, ChangeEvent, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ComponentCategory } from '@prisma/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from 'next/image';
 
 interface Spec {
   id: string;
@@ -90,6 +91,7 @@ interface Product {
   price: number;
   stock: number;
   category: ComponentCategory;
+  image?: string;
   cpuSpec?: CpuSpec;
   gpuSpec?: GpuSpec;
   ramSpec?: RamSpec;
@@ -115,10 +117,15 @@ const ComponentTypes = {
 
 export default function AdminPage() {
   const [category, setCategory] = useState<keyof typeof ComponentTypes>('CPU');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     price: '',
     stock: '',
+    image: '',
     specs: {
       brand: '',
       cores: '',
@@ -162,7 +169,7 @@ export default function AdminPage() {
   // Debounced search function
   const debouncedSearch = useCallback(
     async (query: string) => {
-      if (query.length >= 3) {
+      if (query.length >= 2) {
         setIsSearching(true);
         setSearchError(null);
         try {
@@ -210,10 +217,75 @@ export default function AdminPage() {
     return () => clearTimeout(timeoutId);
   };
 
+  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Check file size (5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        setUploadError('Image size should be less than 5MB');
+        if (e.target) e.target.value = '';
+        setImagePreview(null);
+        setFormData(prev => ({ ...prev, image: '' }));
+        return;
+      }
+
+      // Check file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setUploadError('Only JPEG, PNG and WebP images are allowed');
+        if (e.target) e.target.value = '';
+        setImagePreview(null);
+        setFormData(prev => ({ ...prev, image: '' }));
+        return;
+      }
+
+      // Show preview
+      setImagePreview(URL.createObjectURL(file));
+
+      try {
+        // Upload the file
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Error uploading image');
+        }
+
+        // Store the image path
+        setFormData(prev => ({
+          ...prev,
+          image: data.path
+        }));
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        setUploadError(error instanceof Error ? error.message : 'Error uploading image');
+        setImagePreview(null);
+        setFormData(prev => ({ ...prev, image: '' }));
+        if (e.target) e.target.value = '';
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
+      // Validate required fields
+      if (!formData.name || !formData.price || !formData.stock) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
       const response = await fetch('/api/products', {
         method: 'POST',
         headers: {
@@ -225,21 +297,28 @@ export default function AdminPage() {
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         alert('Product added successfully');
-        // Reset form
+        // Reset form and image preview
         setFormData({
           name: '',
           price: '',
           stock: '',
+          image: '',
           specs: { ...formData.specs }
         });
+        setImagePreview(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       } else {
-        alert('Error adding product');
+        throw new Error(data.details || 'Error adding product');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error adding product');
+      alert(error instanceof Error ? error.message : 'Error adding product');
     }
   };
 
@@ -822,6 +901,45 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label>Product Image</Label>
+                <div className="flex flex-col gap-4">
+                  <Input
+                   type="file"
+                   accept="image/jpeg,image/png,image/webp"
+                   onChange={handleImageChange}
+                   className="cursor-pointer"
+                   />
+                   {uploadError && (
+                    <p className="text-sm text-red-500">
+                      {uploadError}
+                    </p>
+                   )}
+                   {imagePreview && (
+                   <div className="relative w-40 h-40">
+                   <Image
+                   src={imagePreview}
+                   alt="Product preview"
+                   className="object-contain w-full h-full rounded-lg border"
+                   />
+                   <button
+                   type="button"
+                   onClick={() => {
+                      setImagePreview(null);
+                      setFormData(prev => ({ ...prev, image: '' }));
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                    }}
+                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                   >
+                   ✕
+                   </button>
+                  </div>
+                  )}
+                </div>
+              </div>
+
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Specifications</h3>
                 {renderSpecFields()}
@@ -845,7 +963,7 @@ export default function AdminPage() {
                     type="text"
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    placeholder="Type 3 or more characters to search..."
+                    placeholder="Type 2 or more characters to search..."
                   />
                 </div>
               </div>
@@ -862,28 +980,43 @@ export default function AdminPage() {
                   Searching...
                 </div>
               )}
-              {!isSearching && searchQuery.length < 3 && (
+              {!isSearching && searchQuery.length < 2 && (
                 <div className="text-sm text-gray-500">
-                  Type at least 3 characters to search
+                  Type at least 2 characters to search
                 </div>
               )}
-              {!isSearching && searchQuery.length >= 3 && Array.isArray(searchResults) && searchResults.length === 0 && !searchError && (
+              {!isSearching && searchQuery.length >= 2 && Array.isArray(searchResults) && searchResults.length === 0 && !searchError && (
                 <div className="text-sm text-gray-500">
                   No products found
                 </div>
               )}
               {Array.isArray(searchResults) && searchResults.map((product) => (
                 <Card key={product.id} className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{product.name}</h3>
-                      <p className="text-sm text-gray-500">Category: {product.category}</p>
-                      <p className="text-sm">Price: ${product.price.toFixed(2)}</p>
-                      <p className="text-sm">Stock: {product.stock}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">Edit</Button>
-                      <Button variant="destructive" size="sm">Delete</Button>
+                  <div className="flex gap-4">
+                    {product.image ? (
+                      <div className="w-24 h-24 flex-shrink-0">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-contain rounded-md"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center flex-shrink-0">
+                        <span className="text-gray-400">No image</span>
+                      </div>
+                    )}
+                    <div className="flex-grow flex justify-between items-start">
+                      <div>
+                        <h3 className="font-medium">{product.name}</h3>
+                        <p className="text-sm text-gray-500">Category: {product.category}</p>
+                        <p className="text-sm">Price: ${product.price.toFixed(2)}</p>
+                        <p className="text-sm">Stock: {product.stock}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">Edit</Button>
+                        <Button variant="destructive" size="sm">Delete</Button>
+                      </div>
                     </div>
                   </div>
                 </Card>

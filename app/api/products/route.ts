@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, price, stock, category, specs } = body;
+    const { name, price, stock, category, specs, image } = body;
 
     // Create the specific spec based on category
     let specId = null;
@@ -116,6 +116,7 @@ export async function POST(req: Request) {
         price: parseFloat(price),
         stock: parseInt(stock),
         category,
+        image, // Now just store the image path that was uploaded separately
         ...specId,
       },
       include: {
@@ -134,7 +135,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('Error creating product:', error);
     return NextResponse.json(
-      { error: 'Error creating product' },
+      { error: 'Error creating product', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

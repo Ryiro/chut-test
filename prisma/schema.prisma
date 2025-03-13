@@ -45,6 +45,7 @@ model Product {
   price     Float
   stock     Int
   category  ComponentCategory
+  image     String?          // URL or path to the product image
   cpuSpec   CpuSpec?         @relation(fields: [cpuSpecId], references: [id])
   gpuSpec   GpuSpec?         @relation(fields: [gpuSpecId], references: [id])
   ramSpec   RamSpec?         @relation(fields: [ramSpecId], references: [id])

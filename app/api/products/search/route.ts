@@ -8,13 +8,18 @@ export async function GET(request: Request) {
     const query = searchParams.get('q');
 
     if (!query) {
-      // If no query, return all products (limited to 20)
       const products = await prisma.product.findMany({
         take: 20,
-        orderBy: {
-          createdAt: 'desc'
-        },
-        include: {
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          stock: true,
+          category: true,
+          image: true,
+          createdAt: true,
+          updatedAt: true,
           cpuSpec: true,
           gpuSpec: true,
           ramSpec: true,
@@ -29,111 +34,114 @@ export async function GET(request: Request) {
     }
 
     const searchQuery = query.trim();
-    let categorySearch: ComponentCategory | undefined;
-    
+    const upperQuery = searchQuery.toUpperCase();
+
+    // Check if the search query matches any valid category
+    const isValidCategory = Object.values(ComponentCategory).includes(upperQuery as ComponentCategory);
+
     try {
-      // Try to parse the query as a category
-      categorySearch = searchQuery.toUpperCase() as ComponentCategory;
-      if (!Object.values(ComponentCategory).includes(categorySearch)) {
-        categorySearch = undefined;
-      }
-    } catch {
-      categorySearch = undefined;
-    }
-
-    const products = await prisma.product.findMany({
-      where: {
-        OR: [
-          {
-            name: {
-              contains: searchQuery,
+      const products = await prisma.product.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: searchQuery,
+              },
             },
-          },
-          ...(categorySearch ? [{
-            category: categorySearch
-          }] : []),
-          {
-            cpuSpec: {
-              OR: [
-                { brand: { contains: searchQuery } },
-                { socket: { contains: searchQuery } }
-              ]
-            }
-          },
-          {
-            gpuSpec: {
-              brand: { contains: searchQuery }
-            }
-          },
-          {
-            ramSpec: {
-              type: { contains: searchQuery }
-            }
-          },
-          {
-            storageSpec: {
-              type: { contains: searchQuery }
-            }
-          },
-          {
-            motherboardSpec: {
-              OR: [
-                { chipset: { contains: searchQuery } },
-                { socket: { contains: searchQuery } },
-                { formFactor: { contains: searchQuery } }
-              ]
-            }
-          },
-          {
-            psuSpec: {
-              efficiency: { contains: searchQuery }
-            }
-          },
-          {
-            caseSpec: {
-              formFactor: { contains: searchQuery }
-            }
-          },
-          {
-            coolerSpec: {
-              OR: [
-                { type: { contains: searchQuery } },
-                { socket: { contains: searchQuery } }
-              ]
-            }
-          }
-        ].filter(Boolean) as Prisma.ProductWhereInput['OR'],
-      },
-      include: {
-        cpuSpec: true,
-        gpuSpec: true,
-        ramSpec: true,
-        storageSpec: true,
-        motherboardSpec: true,
-        psuSpec: true,
-        caseSpec: true,
-        coolerSpec: true,
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-    });
+            // Only include category search if it's a valid category
+            ...(isValidCategory ? [{
+              category: upperQuery as ComponentCategory,
+            }] : []),
+            {
+              cpuSpec: {
+                OR: [
+                  { brand: { contains: searchQuery } },
+                  { socket: { contains: searchQuery } }
+                ]
+              }
+            },
+            {
+              gpuSpec: {
+                brand: { contains: searchQuery }
+              }
+            },
+            {
+              ramSpec: {
+                type: { contains: searchQuery }
+              }
+            },
+            {
+              storageSpec: {
+                type: { contains: searchQuery }
+              }
+            },
+            {
+              motherboardSpec: {
+                OR: [
+                  { chipset: { contains: searchQuery } },
+                  { socket: { contains: searchQuery } },
+                  { formFactor: { contains: searchQuery } }
+                ]
+              }
+            },
+            {
+              psuSpec: {
+                OR: [
+                  { efficiency: { contains: searchQuery } }
+                ]
+              }
+            },
+            {
+              coolerSpec: {
+                OR: [
+                  { type: { contains: searchQuery } },
+                  { socket: { contains: searchQuery } }
+                ]
+              }
+            },
+          ],
+        },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          stock: true,
+          category: true,
+          image: true,
+          createdAt: true,
+          updatedAt: true,
+          cpuSpec: true,
+          gpuSpec: true,
+          ramSpec: true,
+          storageSpec: true,
+          motherboardSpec: true,
+          psuSpec: true,
+          caseSpec: true,
+          coolerSpec: true,
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+      });
 
-    if (products.length === 0) {
-      return NextResponse.json([]);
+      return NextResponse.json(products);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        // Handle known Prisma errors
+        return NextResponse.json(
+          { error: `Database error: ${error.message}`, code: error.code },
+          { status: 400 }
+        );
+      }
+      throw error; // Re-throw other errors to be caught by outer try-catch
     }
-
-    return NextResponse.json(products);
   } catch (error) {
     console.error('Error searching products:', error);
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return NextResponse.json(
-        { error: 'Database query error' },
-        { status: 400 }
-      );
-    }
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
