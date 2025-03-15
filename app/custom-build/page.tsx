@@ -10,7 +10,7 @@ export default function CustomBuildPage() {
   return (
     <>
       <Header />
-      <main className="container px-4 py-12 md:px-6 md:py-16 lg:py-24">
+      <main className="container mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-16 lg:py-24">
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
