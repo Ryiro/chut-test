@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useCart } from "@/lib/cart"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
@@ -7,8 +8,40 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
-import { useState } from "react"
+import Script from "next/script"
 import { toast } from "sonner"
+
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayResponse) => void;
+  prefill: {
+    name: string;
+    email: string;
+    contact: string;
+  };
+  theme: {
+    color: string;
+  };
+}
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => {
+      open: () => void;
+    };
+  }
+}
 
 export default function CheckoutPage() {
   const { items, removeItem, updateQuantity, subtotal, clearCart } = useCart()
@@ -17,14 +50,74 @@ export default function CheckoutPage() {
   const handleCheckout = async () => {
     setIsProcessing(true)
     try {
-      // Simulate checkout process
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success("Order placed successfully!")
-      clearCart()
-    } catch {
-      toast.error("Failed to process order. Please try again.")
+      const totalAmount = subtotal * 1.1; // Including tax
+      const response = await fetch('/api/razorpay', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: totalAmount,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create order');
+      }
+
+      const options: RazorpayOptions = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'ComputerHut',
+        description: 'Payment for your order',
+        order_id: data.orderId,
+        handler: async function (response) {
+          try {
+            // Verify payment
+            const verifyResponse = await fetch('/api/razorpay/verify', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderId: data.orderId,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+              }),
+            });
+
+            if (!verifyResponse.ok) {
+              throw new Error('Payment verification failed');
+            }
+
+            // Payment successful and verified
+            toast.success("Payment successful! Order confirmed.");
+            clearCart();
+          } catch (error) {
+            console.error('Payment verification failed:', error);
+            toast.error("Payment verification failed. Please contact support.");
+          }
+        },
+        prefill: {
+          name: '',
+          email: '',
+          contact: ''
+        },
+        theme: {
+          color: '#1a365d',
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error('Payment failed:', error);
+      toast.error("Failed to process payment. Please try again.");
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
   }
 
@@ -48,6 +141,10 @@ export default function CheckoutPage() {
 
   return (
     <>
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+      />
       <Header />
       <main className="container mx-auto px-4 py-12">
         <h1 className="text-2xl font-bold mb-8">Checkout</h1>
