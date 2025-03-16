@@ -1,446 +1,432 @@
+"use client"
+
+import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
+import Image from "next/image";
+import { useCart } from "@/lib/cart";
+
+type ComponentType = {
+  id: string;
+  name: string;
+  price: number;
+  image?: string;
+  category: string;
+}
 
 export default function CustomBuildPage() {
+  const { addItem } = useCart();
+  const [selectedComponents, setSelectedComponents] = useState<{
+    CPU: ComponentType | null;
+    GPU: ComponentType | null;
+    MOTHERBOARD: ComponentType | null;
+    RAM: ComponentType | null;
+    STORAGE: ComponentType | null;
+    COOLER: ComponentType | null;
+    PSU: ComponentType | null;
+    CASE: ComponentType | null;
+  }>({
+    CPU: null,
+    GPU: null,
+    MOTHERBOARD: null,
+    RAM: null,
+    STORAGE: null,
+    COOLER: null,
+    PSU: null,
+    CASE: null,
+  });
+
+  const calculateTotal = () => {
+    return Object.values(selectedComponents)
+      .reduce((total, component) => total + (component?.price || 0), 0);
+  };
+
+  const addAllToCart = () => {
+    Object.values(selectedComponents).forEach(component => {
+      if (component) {
+        addItem({
+          id: component.id,
+          name: component.name,
+          price: component.price,
+          image: component.image,
+          category: component.category,
+          quantity: 1
+        });
+      }
+    });
+  };
+
   return (
     <>
       <Header />
-      <main className="container mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-16 lg:py-24">
+      <main className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
-              Build Your Custom PC
-            </h1>
-            <p className="mt-2 text-muted-foreground md:text-lg">
-              Configure your perfect system with our easy-to-use PC builder
+            <h1 className="text-3xl font-bold">Build Your Custom PC</h1>
+            <p className="text-muted-foreground mt-2">
+              Select compatible components for your perfect build
             </p>
           </div>
 
-          <Tabs defaultValue="builder" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="builder">PC Builder</TabsTrigger>
-              <TabsTrigger value="packages">Pre-Configured Packages</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="builder" className="space-y-8">
-              <div className="flex flex-col space-y-8">
-                {/* CPU Selection */}
-                <div className="rounded-lg border p-6 shadow-sm">
-                  <h2 className="text-xl font-semibold mb-4">1. Choose Your Processor</h2>
-                  
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label htmlFor="cpu-brand" className="text-sm font-medium">Brand</label>
-                        <Select>
-                          <option value="intel">Intel</option>
-                          <option value="amd">AMD</option>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <label htmlFor="cpu-model" className="text-sm font-medium">Model</label>
-                        <Select>
-                          <option value="i5-13600k">Intel Core i5-13600K</option>
-                          <option value="i7-13700k">Intel Core i7-13700K</option>
-                          <option value="i9-13900k">Intel Core i9-13900K</option>
-                          <option value="ryzen-5-7600x">AMD Ryzen 5 7600X</option>
-                          <option value="ryzen-7-7700x">AMD Ryzen 7 7700X</option>
-                          <option value="ryzen-9-7950x">AMD Ryzen 9 7950X</option>
-                        </Select>
-                      </div>
-                      
-                      <div className="pt-2">
-                        <h3 className="text-sm font-medium mb-2">Performance Level</h3>
-                        <Slider
-                          defaultValue={[50]}
-                          max={100}
-                          step={1}
-                          className="w-full"
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Component Selection Area */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* CPU */}
+              <Card className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">Processor (CPU)</h2>
+                    <p className="text-sm text-muted-foreground">The brain of your computer</p>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <a href="/products?category=CPU">Select CPU</a>
+                  </Button>
+                </div>
+                {selectedComponents.CPU ? (
+                  <div className="flex items-start gap-4">
+                    {selectedComponents.CPU.image && (
+                      <div className="relative w-20 h-20">
+                        <Image
+                          src={selectedComponents.CPU.image}
+                          alt={selectedComponents.CPU.name}
+                          fill
+                          className="object-contain"
                         />
-                        <div className="flex justify-between mt-2">
-                          <span className="text-xs text-muted-foreground">Entry-Level</span>
-                          <span className="text-xs text-muted-foreground">Professional</span>
-                        </div>
                       </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-medium">{selectedComponents.CPU.name}</h3>
+                      <p className="text-sm text-muted-foreground">${selectedComponents.CPU.price}</p>
                     </div>
-                    
-                    <div className="border rounded-md p-4 bg-muted/20">
-                      <h3 className="font-medium mb-2">Selected CPU</h3>
-                      <div className="space-y-2 text-sm">
-                        <p className="font-semibold">Intel Core i7-13700K</p>
-                        <p>16 Cores (8P + 8E) / 24 Threads</p>
-                        <p>Up to 5.4 GHz Turbo Frequency</p>
-                        <p>30MB Cache</p>
-                        <p className="mt-4 text-primary font-semibold">+ $429.99</p>
-                      </div>
-                    </div>
+                    <Button 
+                      variant="ghost" 
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => setSelectedComponents(prev => ({ ...prev, CPU: null }))}
+                    >
+                      Remove
+                    </Button>
                   </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">No CPU selected</div>
+                )}
+              </Card>
+
+              {/* GPU */}
+              <Card className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">Graphics Card (GPU)</h2>
+                    <p className="text-sm text-muted-foreground">Powers your gaming experience</p>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <a href="/products?category=GPU">Select GPU</a>
+                  </Button>
                 </div>
-                
-                {/* Additional component sections would go here... */}
-                
-                {/* Summary Section */}
-                <div className="rounded-lg border p-6 shadow-sm bg-muted/20">
-                  <h2 className="text-xl font-semibold mb-4">Your Custom PC Build</h2>
+                {selectedComponents.GPU ? (
+                  <div className="flex items-start gap-4">
+                    {selectedComponents.GPU.image && (
+                      <div className="relative w-20 h-20">
+                        <Image
+                          src={selectedComponents.GPU.image}
+                          alt={selectedComponents.GPU.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-medium">{selectedComponents.GPU.name}</h3>
+                      <p className="text-sm text-muted-foreground">${selectedComponents.GPU.price}</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => setSelectedComponents(prev => ({ ...prev, GPU: null }))}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">No GPU selected</div>
+                )}
+              </Card>
+
+              {/* Motherboard */}
+              <Card className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">Motherboard</h2>
+                    <p className="text-sm text-muted-foreground">The foundation of your build</p>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <a href="/products?category=MOTHERBOARD">Select Motherboard</a>
+                  </Button>
+                </div>
+                {selectedComponents.MOTHERBOARD ? (
+                  <div className="flex items-start gap-4">
+                    {selectedComponents.MOTHERBOARD.image && (
+                      <div className="relative w-20 h-20">
+                        <Image
+                          src={selectedComponents.MOTHERBOARD.image}
+                          alt={selectedComponents.MOTHERBOARD.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-medium">{selectedComponents.MOTHERBOARD.name}</h3>
+                      <p className="text-sm text-muted-foreground">${selectedComponents.MOTHERBOARD.price}</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => setSelectedComponents(prev => ({ ...prev, MOTHERBOARD: null }))}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">No motherboard selected</div>
+                )}
+              </Card>
+
+              {/* RAM */}
+              <Card className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">Memory (RAM)</h2>
+                    <p className="text-sm text-muted-foreground">Your system&apos;s short-term memory</p>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <a href="/products?category=RAM">Select RAM</a>
+                  </Button>
+                </div>
+                {selectedComponents.RAM ? (
+                  <div className="flex items-start gap-4">
+                    {selectedComponents.RAM.image && (
+                      <div className="relative w-20 h-20">
+                        <Image
+                          src={selectedComponents.RAM.image}
+                          alt={selectedComponents.RAM.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-medium">{selectedComponents.RAM.name}</h3>
+                      <p className="text-sm text-muted-foreground">${selectedComponents.RAM.price}</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => setSelectedComponents(prev => ({ ...prev, RAM: null }))}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">No RAM selected</div>
+                )}
+              </Card>
+
+              {/* Storage */}
+              <Card className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">Storage</h2>
+                    <p className="text-sm text-muted-foreground">Where your data lives</p>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <a href="/products?category=STORAGE">Select Storage</a>
+                  </Button>
+                </div>
+                {selectedComponents.STORAGE ? (
+                  <div className="flex items-start gap-4">
+                    {selectedComponents.STORAGE.image && (
+                      <div className="relative w-20 h-20">
+                        <Image
+                          src={selectedComponents.STORAGE.image}
+                          alt={selectedComponents.STORAGE.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-medium">{selectedComponents.STORAGE.name}</h3>
+                      <p className="text-sm text-muted-foreground">${selectedComponents.STORAGE.price}</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => setSelectedComponents(prev => ({ ...prev, STORAGE: null }))}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">No storage selected</div>
+                )}
+              </Card>
+
+              {/* CPU Cooler */}
+              <Card className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">CPU Cooler</h2>
+                    <p className="text-sm text-muted-foreground">Keeps your CPU cool under pressure</p>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <a href="/products?category=COOLER">Select Cooler</a>
+                  </Button>
+                </div>
+                {selectedComponents.COOLER ? (
+                  <div className="flex items-start gap-4">
+                    {selectedComponents.COOLER.image && (
+                      <div className="relative w-20 h-20">
+                        <Image
+                          src={selectedComponents.COOLER.image}
+                          alt={selectedComponents.COOLER.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-medium">{selectedComponents.COOLER.name}</h3>
+                      <p className="text-sm text-muted-foreground">${selectedComponents.COOLER.price}</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => setSelectedComponents(prev => ({ ...prev, COOLER: null }))}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">No cooler selected</div>
+                )}
+              </Card>
+
+              {/* Power Supply */}
+              <Card className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">Power Supply (PSU)</h2>
+                    <p className="text-sm text-muted-foreground">Reliable power for your components</p>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <a href="/products?category=PSU">Select PSU</a>
+                  </Button>
+                </div>
+                {selectedComponents.PSU ? (
+                  <div className="flex items-start gap-4">
+                    {selectedComponents.PSU.image && (
+                      <div className="relative w-20 h-20">
+                        <Image
+                          src={selectedComponents.PSU.image}
+                          alt={selectedComponents.PSU.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-medium">{selectedComponents.PSU.name}</h3>
+                      <p className="text-sm text-muted-foreground">${selectedComponents.PSU.price}</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => setSelectedComponents(prev => ({ ...prev, PSU: null }))}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">No PSU selected</div>
+                )}
+              </Card>
+
+              {/* Case */}
+              <Card className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">Case</h2>
+                    <p className="text-sm text-muted-foreground">Houses and protects your components</p>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <a href="/products?category=CASE">Select Case</a>
+                  </Button>
+                </div>
+                {selectedComponents.CASE ? (
+                  <div className="flex items-start gap-4">
+                    {selectedComponents.CASE.image && (
+                      <div className="relative w-20 h-20">
+                        <Image
+                          src={selectedComponents.CASE.image}
+                          alt={selectedComponents.CASE.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-medium">{selectedComponents.CASE.name}</h3>
+                      <p className="text-sm text-muted-foreground">${selectedComponents.CASE.price}</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => setSelectedComponents(prev => ({ ...prev, CASE: null }))}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">No case selected</div>
+                )}
+              </Card>
+            </div>
+
+            {/* Build Summary */}
+            <div className="lg:col-span-1">
+              <Card className="p-6 sticky top-24">
+                <h2 className="text-xl font-semibold mb-4">Build Summary</h2>
+                <div className="space-y-4">
+                  {Object.entries(selectedComponents).map(([category, component]) => (
+                    component && (
+                      <div key={category} className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">{category}</span>
+                        <span className="font-medium">${component.price}</span>
+                      </div>
+                    )
+                  ))}
                   
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>Intel Core i7-13700K</span>
-                      <span className="font-semibold">$429.99</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>NVIDIA GeForce RTX 4070 12GB</span>
-                      <span className="font-semibold">$599.99</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>32GB DDR5 RAM (2x16GB)</span>
-                      <span className="font-semibold">$169.99</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>1TB NVMe SSD</span>
-                      <span className="font-semibold">$89.99</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>ComputerHut 850W Gold PSU</span>
-                      <span className="font-semibold">$119.99</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Premium Mid-Tower Case</span>
-                      <span className="font-semibold">$129.99</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>System Assembly & Testing</span>
-                      <span className="font-semibold">$99.00</span>
-                    </div>
-                    
-                    <Separator className="my-2" />
-                    
-                    <div className="flex justify-between items-center font-bold">
-                      <span>Total</span>
-                      <span>$1,639.94</span>
-                    </div>
-                    
-                    <div className="pt-4">
-                      <Button className="w-full">Complete Your Build</Button>
-                    </div>
+                  <Separator />
+                  
+                  <div className="flex justify-between font-bold">
+                    <span>Total</span>
+                    <span>${calculateTotal().toFixed(2)}</span>
                   </div>
+
+                  <Button 
+                    className="w-full" 
+                    onClick={addAllToCart}
+                    disabled={Object.values(selectedComponents).every(comp => comp === null)}
+                  >
+                    Add All to Cart
+                  </Button>
                 </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="packages" className="space-y-8">
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="border rounded-lg overflow-hidden">
-                  <div className="bg-primary/10 p-4">
-                    <h3 className="font-semibold text-lg">Gaming Starter</h3>
-                    <p className="text-sm text-muted-foreground">Perfect for 1080p gaming</p>
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Intel Core i5-13400F
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        NVIDIA RTX 4060 8GB
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        16GB DDR4 RAM
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        500GB NVMe SSD
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        650W Bronze PSU
-                      </li>
-                    </ul>
-                    <div className="pt-4">
-                      <p className="text-xl font-bold">$999</p>
-                      <p className="text-sm text-muted-foreground">Free shipping</p>
-                    </div>
-                    <Button className="w-full">Select & Customize</Button>
-                  </div>
-                </div>
-                
-                <div className="border rounded-lg overflow-hidden border-primary">
-                  <div className="bg-primary p-4">
-                    <h3 className="font-semibold text-lg text-primary-foreground">Gaming Pro</h3>
-                    <p className="text-sm text-primary-foreground/80">High-performance 1440p gaming</p>
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Intel Core i7-13700KF
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        NVIDIA RTX 4070 12GB
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        32GB DDR5 RAM
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        1TB NVMe SSD
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        850W Gold PSU
-                      </li>
-                    </ul>
-                    <div className="pt-4">
-                      <p className="text-xl font-bold">$1,599</p>
-                      <p className="text-sm text-muted-foreground">Free shipping</p>
-                    </div>
-                    <Button className="w-full">Select & Customize</Button>
-                  </div>
-                </div>
-                
-                <div className="border rounded-lg overflow-hidden">
-                  <div className="bg-primary/10 p-4">
-                    <h3 className="font-semibold text-lg">Gaming Ultra</h3>
-                    <p className="text-sm text-muted-foreground">Ultimate 4K gaming experience</p>
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Intel Core i9-13900K
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        NVIDIA RTX 4080 16GB
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        64GB DDR5 RAM
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        2TB NVMe SSD
-                      </li>
-                      <li className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mr-2 h-4 w-4 text-primary"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        1000W Platinum PSU
-                      </li>
-                    </ul>
-                    <div className="pt-4">
-                      <p className="text-xl font-bold">$2,499</p>
-                      <p className="text-sm text-muted-foreground">Free shipping</p>
-                    </div>
-                    <Button className="w-full">Select & Customize</Button>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+              </Card>
+            </div>
+          </div>
         </div>
       </main>
       <Footer />
