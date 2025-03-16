@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useState } from 'react'
 import { useTheme } from 'next-themes'
+import { useCart } from '@/lib/cart'
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -18,6 +19,7 @@ import {
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { theme, setTheme } = useTheme()
+  const { itemCount } = useCart()
   
   return (
     <header className="bg-[#1a365d] dark:bg-[#1e3a5f] sticky top-0 z-50 w-full border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-[#1a365d]/80 dark:supports-[backdrop-filter]:bg-[#1e3a5f]/80">
@@ -151,25 +153,33 @@ export default function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-white hover:bg-white/10"
+              className="text-white hover:bg-white/10 relative"
+              asChild
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-7 w-7"
-              >
-                <circle cx="8" cy="21" r="1" />
-                <circle cx="19" cy="21" r="1" />
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-              </svg>
-              <span className="sr-only">Cart</span>
+              <Link href="/checkout">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-7 w-7"
+                >
+                  <circle cx="8" cy="21" r="1" />
+                  <circle cx="19" cy="21" r="1" />
+                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                </svg>
+                {itemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {itemCount}
+                  </span>
+                )}
+                <span className="sr-only">Cart</span>
+              </Link>
             </Button>
 
             <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-white/10" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -340,6 +350,9 @@ export default function Header() {
           <Link href="/about" className="text-white/80 hover:text-white text-sm font-medium transition-colors">About</Link>
           <Link href="/support" className="text-white/80 hover:text-white text-sm font-medium transition-colors">Support</Link>
           <Link href="/custom-build" className="text-white/80 hover:text-white text-sm font-medium transition-colors">Build Your PC</Link>
+          <Link href="/checkout" className="text-white/80 hover:text-white text-sm font-medium transition-colors flex items-center gap-2">
+            Cart {itemCount > 0 && <span className="bg-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{itemCount}</span>}
+          </Link>
         </div>
       </div>
     </header>

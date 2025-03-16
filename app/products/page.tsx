@@ -3,7 +3,6 @@ import { prisma } from '@/lib/db'
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -13,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import Image from "next/image"
+import ProductCard from "@/components/ProductCard"
 
 // Force Next.js to treat this as a dynamic page
 export const fetchCache = 'force-no-store'
@@ -150,48 +149,7 @@ export default async function Products() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map((product) => (
-                  <Card key={product.id} className="flex flex-col overflow-hidden">
-                    <div className="aspect-square relative bg-muted/20 p-4">
-                      {product.image ? (
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          fill
-                          className="object-contain p-4"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="48"
-                            height="48"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-muted-foreground/40"
-                          >
-                            <rect width="18" height="18" x="3" y="3" rx="2" />
-                            <circle cx="9" cy="9" r="2" />
-                            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h2 className="font-semibold mb-2">{product.name}</h2>
-                      <p className="text-sm text-muted-foreground mb-2">Category: {product.category}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold">${product.price}</span>
-                        <span className={`text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                        </span>
-                      </div>
-                      <Button className="w-full mt-4">Add to Cart</Button>
-                    </div>
-                  </Card>
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             )}
