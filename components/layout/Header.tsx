@@ -230,36 +230,36 @@ export default function Header() {
                   <div className="grid gap-3 p-4 w-[400px]">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h4 className="text-sm font-medium leading-none mb-1">Components</h4>
+                        <h4 className="text-sm font-medium leading-none mb-1">PC Components</h4>
                         <div className="grid gap-2">
-                          <Link href="/products/cpu" className="text-sm text-muted-foreground hover:text-foreground">
-                            Processors
+                          <Link href="/products?category=CPU" className="text-sm text-muted-foreground hover:text-foreground">
+                            Processors (CPU)
                           </Link>
-                          <Link href="/products/gpu" className="text-sm text-muted-foreground hover:text-foreground">
-                            Graphics Cards
+                          <Link href="/products?category=MOTHERBOARD" className="text-sm text-muted-foreground hover:text-foreground">
+                            Motherboards
                           </Link>
-                          <Link href="/products/ram" className="text-sm text-muted-foreground hover:text-foreground">
-                            Memory
+                          <Link href="/products?category=RAM" className="text-sm text-muted-foreground hover:text-foreground">
+                            Memory (RAM)
                           </Link>
-                          <Link href="/products/storage" className="text-sm text-muted-foreground hover:text-foreground">
-                            Storage
+                          <Link href="/products?category=GPU" className="text-sm text-muted-foreground hover:text-foreground">
+                            Graphics Cards (GPU)
                           </Link>
                         </div>
                       </div>
                       <div>
-                        <h4 className="text-sm font-medium leading-none mb-1">Peripherals</h4>
+                        <h4 className="text-sm font-medium leading-none mb-1">Essential Parts</h4>
                         <div className="grid gap-2">
-                          <Link href="/products/monitors" className="text-sm text-muted-foreground hover:text-foreground">
-                            Monitors
+                          <Link href="/products?category=STORAGE" className="text-sm text-muted-foreground hover:text-foreground">
+                            Storage Drives
                           </Link>
-                          <Link href="/products/keyboards" className="text-sm text-muted-foreground hover:text-foreground">
-                            Keyboards
+                          <Link href="/products?category=PSU" className="text-sm text-muted-foreground hover:text-foreground">
+                            Power Supplies
                           </Link>
-                          <Link href="/products/mouse" className="text-sm text-muted-foreground hover:text-foreground">
-                            Mouse
+                          <Link href="/products?category=CASE" className="text-sm text-muted-foreground hover:text-foreground">
+                            PC Cases
                           </Link>
-                          <Link href="/products/headsets" className="text-sm text-muted-foreground hover:text-foreground">
-                            Headsets
+                          <Link href="/products?category=COOLER" className="text-sm text-muted-foreground hover:text-foreground">
+                            CPU Coolers
                           </Link>
                         </div>
                       </div>
@@ -328,21 +328,21 @@ export default function Header() {
             <p className="text-white/80 font-medium text-sm">Products</p>
             <div className="pl-4 space-y-2">
               <div>
-                <p className="text-white/60 text-xs mb-1">Components</p>
+                <p className="text-white/60 text-xs mb-1">PC Components</p>
                 <div className="space-y-1">
-                  <Link href="/products/cpu" className="block text-white/80 hover:text-white text-sm transition-colors">Processors</Link>
-                  <Link href="/products/gpu" className="block text-white/80 hover:text-white text-sm transition-colors">Graphics Cards</Link>
-                  <Link href="/products/ram" className="block text-white/80 hover:text-white text-sm transition-colors">Memory</Link>
-                  <Link href="/products/storage" className="block text-white/80 hover:text-white text-sm transition-colors">Storage</Link>
+                  <Link href="/products?category=CPU" className="block text-white/80 hover:text-white text-sm transition-colors">Processors (CPU)</Link>
+                  <Link href="/products?category=MOTHERBOARD" className="block text-white/80 hover:text-white text-sm transition-colors">Motherboards</Link>
+                  <Link href="/products?category=RAM" className="block text-white/80 hover:text-white text-sm transition-colors">Memory (RAM)</Link>
+                  <Link href="/products?category=GPU" className="block text-white/80 hover:text-white text-sm transition-colors">Graphics Cards (GPU)</Link>
                 </div>
               </div>
               <div>
-                <p className="text-white/60 text-xs mb-1">Peripherals</p>
+                <p className="text-white/60 text-xs mb-1">Essential Parts</p>
                 <div className="space-y-1">
-                  <Link href="/products/monitors" className="block text-white/80 hover:text-white text-sm transition-colors">Monitors</Link>
-                  <Link href="/products/keyboards" className="block text-white/80 hover:text-white text-sm transition-colors">Keyboards</Link>
-                  <Link href="/products/mouse" className="block text-white/80 hover:text-white text-sm transition-colors">Mouse</Link>
-                  <Link href="/products/headsets" className="block text-white/80 hover:text-white text-sm transition-colors">Headsets</Link>
+                  <Link href="/products?category=STORAGE" className="block text-white/80 hover:text-white text-sm transition-colors">Storage Drives</Link>
+                  <Link href="/products?category=PSU" className="block text-white/80 hover:text-white text-sm transition-colors">Power Supplies</Link>
+                  <Link href="/products?category=CASE" className="block text-white/80 hover:text-white text-sm transition-colors">PC Cases</Link>
+                  <Link href="/products?category=COOLER" className="block text-white/80 hover:text-white text-sm transition-colors">CPU Coolers</Link>
                 </div>
               </div>
             </div>

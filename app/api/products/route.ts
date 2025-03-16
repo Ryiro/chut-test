@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { ComponentCategory } from '@prisma/client';
 
 export async function POST(req: Request) {
   try {
@@ -138,5 +139,33 @@ export async function POST(req: Request) {
       { error: 'Error creating product', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const category = searchParams.get('category')
+
+    const products = await prisma.product.findMany({
+      where: category ? {
+        category: category as ComponentCategory
+      } : undefined,
+      include: {
+        cpuSpec: true,
+        gpuSpec: true,
+        ramSpec: true,
+        storageSpec: true,
+        motherboardSpec: true,
+        psuSpec: true,
+        caseSpec: true,
+        coolerSpec: true,
+      }
+    })
+
+    return NextResponse.json(products)
+  } catch (error) {
+    console.error('Failed to fetch products:', error)
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
   }
 }
