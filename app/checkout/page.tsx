@@ -51,6 +51,8 @@ export default function CheckoutPage() {
     setIsProcessing(true)
     try {
       const totalAmount = subtotal * 1.1; // Including tax
+      console.log('Creating order with amount:', totalAmount);
+
       const response = await fetch('/api/razorpay', {
         method: 'POST',
         headers: {
@@ -62,9 +64,14 @@ export default function CheckoutPage() {
       });
 
       const data = await response.json();
+      console.log('Razorpay API response:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create order');
+      }
+
+      if (!data.orderId) {
+        throw new Error('No order ID received from Razorpay');
       }
 
       const options: RazorpayOptions = {
@@ -75,6 +82,7 @@ export default function CheckoutPage() {
         description: 'Payment for your order',
         order_id: data.orderId,
         handler: async function (response) {
+          console.log('Payment success response:', response);
           try {
             // Verify payment
             const verifyResponse = await fetch('/api/razorpay/verify', {
@@ -90,7 +98,8 @@ export default function CheckoutPage() {
             });
 
             if (!verifyResponse.ok) {
-              throw new Error('Payment verification failed');
+              const errorData = await verifyResponse.json();
+              throw new Error(errorData.error || 'Payment verification failed');
             }
 
             // Payment successful and verified
@@ -111,11 +120,12 @@ export default function CheckoutPage() {
         }
       };
 
+      console.log('Initializing Razorpay with options:', { ...options, key: '***' });
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
       console.error('Payment failed:', error);
-      toast.error("Failed to process payment. Please try again.");
+      toast.error(error instanceof Error ? error.message : "Failed to process payment. Please try again.");
     } finally {
       setIsProcessing(false);
     }
