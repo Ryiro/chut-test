@@ -5,7 +5,9 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useCart } from "@/lib/cart"
+import { useBuild } from "@/lib/build"
 import type { CartItem } from "@/lib/cart"
+import type { ComponentCategory } from '@prisma/client'
 import { toast } from 'sonner'
 
 type ProductCardProps = {
@@ -14,14 +16,16 @@ type ProductCardProps = {
     name: string
     price: number
     stock: number
-    category: string
+    category: ComponentCategory
     image?: string | null
   }
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart()
+  const { addToBuild } = useBuild()
   const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [isAddingToBuild, setIsAddingToBuild] = useState(false)
   
   const handleAddToCart = () => {
     setIsAddingToCart(true)
@@ -35,11 +39,28 @@ export default function ProductCard({ product }: ProductCardProps) {
       quantity: 1
     }
     
-    // Add a slight delay to show loading state
     setTimeout(() => {
       addItem(cartItem)
       setIsAddingToCart(false)
       toast.success(`${product.name} added to cart`)
+    }, 300)
+  }
+
+  const handleAddToBuild = () => {
+    setIsAddingToBuild(true)
+    
+    const buildItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image || undefined,
+      category: product.category,
+    }
+    
+    setTimeout(() => {
+      addToBuild(buildItem)
+      setIsAddingToBuild(false)
+      toast.success(`${product.name} added to build`)
     }, 300)
   }
   
@@ -83,13 +104,21 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
           </span>
         </div>
-        <Button 
-          className="w-full mt-4" 
-          onClick={handleAddToCart}
-          disabled={isAddingToCart || product.stock <= 0}
-        >
-          {isAddingToCart ? 'Adding...' : 'Add to Cart'}
-        </Button>
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          <Button 
+            variant="outline"
+            onClick={handleAddToBuild}
+            disabled={isAddingToBuild || product.stock <= 0}
+          >
+            {isAddingToBuild ? 'Adding...' : 'Add to Build'}
+          </Button>
+          <Button 
+            onClick={handleAddToCart}
+            disabled={isAddingToCart || product.stock <= 0}
+          >
+            {isAddingToCart ? 'Adding...' : 'Add to Cart'}
+          </Button>
+        </div>
       </div>
     </Card>
   )

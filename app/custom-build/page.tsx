@@ -1,62 +1,33 @@
 "use client"
 
-import { useState } from "react";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import Image from "next/image";
 import { useCart } from "@/lib/cart";
-
-type ComponentType = {
-  id: string;
-  name: string;
-  price: number;
-  image?: string;
-  category: string;
-}
+import { useBuild } from "@/lib/build";
+import { toast } from 'sonner';
 
 export default function CustomBuildPage() {
   const { addItem } = useCart();
-  const [selectedComponents, setSelectedComponents] = useState<{
-    CPU: ComponentType | null;
-    GPU: ComponentType | null;
-    MOTHERBOARD: ComponentType | null;
-    RAM: ComponentType | null;
-    STORAGE: ComponentType | null;
-    COOLER: ComponentType | null;
-    PSU: ComponentType | null;
-    CASE: ComponentType | null;
-  }>({
-    CPU: null,
-    GPU: null,
-    MOTHERBOARD: null,
-    RAM: null,
-    STORAGE: null,
-    COOLER: null,
-    PSU: null,
-    CASE: null,
-  });
-
-  const calculateTotal = () => {
-    return Object.values(selectedComponents)
-      .reduce((total, component) => total + (component?.price || 0), 0);
-  };
+  const { components, removeFromBuild, buildTotal } = useBuild();
 
   const addAllToCart = () => {
-    Object.values(selectedComponents).forEach(component => {
+    Object.entries(components).forEach(([category, component]) => {
       if (component) {
         addItem({
           id: component.id,
           name: component.name,
           price: component.price,
           image: component.image,
-          category: component.category,
+          category: category,
           quantity: 1
         });
       }
     });
+    toast.success('All components added to cart');
   };
 
   return (
@@ -85,26 +56,26 @@ export default function CustomBuildPage() {
                     <a href="/products?category=CPU">Select CPU</a>
                   </Button>
                 </div>
-                {selectedComponents.CPU ? (
+                {components.CPU ? (
                   <div className="flex items-start gap-4">
-                    {selectedComponents.CPU.image && (
+                    {components.CPU.image && (
                       <div className="relative w-20 h-20">
                         <Image
-                          src={selectedComponents.CPU.image}
-                          alt={selectedComponents.CPU.name}
+                          src={components.CPU.image}
+                          alt={components.CPU.name}
                           fill
                           className="object-contain"
                         />
                       </div>
                     )}
                     <div className="flex-1">
-                      <h3 className="font-medium">{selectedComponents.CPU.name}</h3>
-                      <p className="text-sm text-muted-foreground">${selectedComponents.CPU.price}</p>
+                      <h3 className="font-medium">{components.CPU.name}</h3>
+                      <p className="text-sm text-muted-foreground">${components.CPU.price}</p>
                     </div>
                     <Button 
                       variant="ghost" 
                       className="text-red-500 hover:text-red-600"
-                      onClick={() => setSelectedComponents(prev => ({ ...prev, CPU: null }))}
+                      onClick={() => removeFromBuild('CPU')}
                     >
                       Remove
                     </Button>
@@ -125,26 +96,26 @@ export default function CustomBuildPage() {
                     <a href="/products?category=GPU">Select GPU</a>
                   </Button>
                 </div>
-                {selectedComponents.GPU ? (
+                {components.GPU ? (
                   <div className="flex items-start gap-4">
-                    {selectedComponents.GPU.image && (
+                    {components.GPU.image && (
                       <div className="relative w-20 h-20">
                         <Image
-                          src={selectedComponents.GPU.image}
-                          alt={selectedComponents.GPU.name}
+                          src={components.GPU.image}
+                          alt={components.GPU.name}
                           fill
                           className="object-contain"
                         />
                       </div>
                     )}
                     <div className="flex-1">
-                      <h3 className="font-medium">{selectedComponents.GPU.name}</h3>
-                      <p className="text-sm text-muted-foreground">${selectedComponents.GPU.price}</p>
+                      <h3 className="font-medium">{components.GPU.name}</h3>
+                      <p className="text-sm text-muted-foreground">${components.GPU.price}</p>
                     </div>
                     <Button 
                       variant="ghost" 
                       className="text-red-500 hover:text-red-600"
-                      onClick={() => setSelectedComponents(prev => ({ ...prev, GPU: null }))}
+                      onClick={() => removeFromBuild('GPU')}
                     >
                       Remove
                     </Button>
@@ -165,26 +136,26 @@ export default function CustomBuildPage() {
                     <a href="/products?category=MOTHERBOARD">Select Motherboard</a>
                   </Button>
                 </div>
-                {selectedComponents.MOTHERBOARD ? (
+                {components.MOTHERBOARD ? (
                   <div className="flex items-start gap-4">
-                    {selectedComponents.MOTHERBOARD.image && (
+                    {components.MOTHERBOARD.image && (
                       <div className="relative w-20 h-20">
                         <Image
-                          src={selectedComponents.MOTHERBOARD.image}
-                          alt={selectedComponents.MOTHERBOARD.name}
+                          src={components.MOTHERBOARD.image}
+                          alt={components.MOTHERBOARD.name}
                           fill
                           className="object-contain"
                         />
                       </div>
                     )}
                     <div className="flex-1">
-                      <h3 className="font-medium">{selectedComponents.MOTHERBOARD.name}</h3>
-                      <p className="text-sm text-muted-foreground">${selectedComponents.MOTHERBOARD.price}</p>
+                      <h3 className="font-medium">{components.MOTHERBOARD.name}</h3>
+                      <p className="text-sm text-muted-foreground">${components.MOTHERBOARD.price}</p>
                     </div>
                     <Button 
                       variant="ghost" 
                       className="text-red-500 hover:text-red-600"
-                      onClick={() => setSelectedComponents(prev => ({ ...prev, MOTHERBOARD: null }))}
+                      onClick={() => removeFromBuild('MOTHERBOARD')}
                     >
                       Remove
                     </Button>
@@ -205,26 +176,26 @@ export default function CustomBuildPage() {
                     <a href="/products?category=RAM">Select RAM</a>
                   </Button>
                 </div>
-                {selectedComponents.RAM ? (
+                {components.RAM ? (
                   <div className="flex items-start gap-4">
-                    {selectedComponents.RAM.image && (
+                    {components.RAM.image && (
                       <div className="relative w-20 h-20">
                         <Image
-                          src={selectedComponents.RAM.image}
-                          alt={selectedComponents.RAM.name}
+                          src={components.RAM.image}
+                          alt={components.RAM.name}
                           fill
                           className="object-contain"
                         />
                       </div>
                     )}
                     <div className="flex-1">
-                      <h3 className="font-medium">{selectedComponents.RAM.name}</h3>
-                      <p className="text-sm text-muted-foreground">${selectedComponents.RAM.price}</p>
+                      <h3 className="font-medium">{components.RAM.name}</h3>
+                      <p className="text-sm text-muted-foreground">${components.RAM.price}</p>
                     </div>
                     <Button 
                       variant="ghost" 
                       className="text-red-500 hover:text-red-600"
-                      onClick={() => setSelectedComponents(prev => ({ ...prev, RAM: null }))}
+                      onClick={() => removeFromBuild('RAM')}
                     >
                       Remove
                     </Button>
@@ -245,26 +216,26 @@ export default function CustomBuildPage() {
                     <a href="/products?category=STORAGE">Select Storage</a>
                   </Button>
                 </div>
-                {selectedComponents.STORAGE ? (
+                {components.STORAGE ? (
                   <div className="flex items-start gap-4">
-                    {selectedComponents.STORAGE.image && (
+                    {components.STORAGE.image && (
                       <div className="relative w-20 h-20">
                         <Image
-                          src={selectedComponents.STORAGE.image}
-                          alt={selectedComponents.STORAGE.name}
+                          src={components.STORAGE.image}
+                          alt={components.STORAGE.name}
                           fill
                           className="object-contain"
                         />
                       </div>
                     )}
                     <div className="flex-1">
-                      <h3 className="font-medium">{selectedComponents.STORAGE.name}</h3>
-                      <p className="text-sm text-muted-foreground">${selectedComponents.STORAGE.price}</p>
+                      <h3 className="font-medium">{components.STORAGE.name}</h3>
+                      <p className="text-sm text-muted-foreground">${components.STORAGE.price}</p>
                     </div>
                     <Button 
                       variant="ghost" 
                       className="text-red-500 hover:text-red-600"
-                      onClick={() => setSelectedComponents(prev => ({ ...prev, STORAGE: null }))}
+                      onClick={() => removeFromBuild('STORAGE')}
                     >
                       Remove
                     </Button>
@@ -285,26 +256,26 @@ export default function CustomBuildPage() {
                     <a href="/products?category=COOLER">Select Cooler</a>
                   </Button>
                 </div>
-                {selectedComponents.COOLER ? (
+                {components.COOLER ? (
                   <div className="flex items-start gap-4">
-                    {selectedComponents.COOLER.image && (
+                    {components.COOLER.image && (
                       <div className="relative w-20 h-20">
                         <Image
-                          src={selectedComponents.COOLER.image}
-                          alt={selectedComponents.COOLER.name}
+                          src={components.COOLER.image}
+                          alt={components.COOLER.name}
                           fill
                           className="object-contain"
                         />
                       </div>
                     )}
                     <div className="flex-1">
-                      <h3 className="font-medium">{selectedComponents.COOLER.name}</h3>
-                      <p className="text-sm text-muted-foreground">${selectedComponents.COOLER.price}</p>
+                      <h3 className="font-medium">{components.COOLER.name}</h3>
+                      <p className="text-sm text-muted-foreground">${components.COOLER.price}</p>
                     </div>
                     <Button 
                       variant="ghost" 
                       className="text-red-500 hover:text-red-600"
-                      onClick={() => setSelectedComponents(prev => ({ ...prev, COOLER: null }))}
+                      onClick={() => removeFromBuild('COOLER')}
                     >
                       Remove
                     </Button>
@@ -325,26 +296,26 @@ export default function CustomBuildPage() {
                     <a href="/products?category=PSU">Select PSU</a>
                   </Button>
                 </div>
-                {selectedComponents.PSU ? (
+                {components.PSU ? (
                   <div className="flex items-start gap-4">
-                    {selectedComponents.PSU.image && (
+                    {components.PSU.image && (
                       <div className="relative w-20 h-20">
                         <Image
-                          src={selectedComponents.PSU.image}
-                          alt={selectedComponents.PSU.name}
+                          src={components.PSU.image}
+                          alt={components.PSU.name}
                           fill
                           className="object-contain"
                         />
                       </div>
                     )}
                     <div className="flex-1">
-                      <h3 className="font-medium">{selectedComponents.PSU.name}</h3>
-                      <p className="text-sm text-muted-foreground">${selectedComponents.PSU.price}</p>
+                      <h3 className="font-medium">{components.PSU.name}</h3>
+                      <p className="text-sm text-muted-foreground">${components.PSU.price}</p>
                     </div>
                     <Button 
                       variant="ghost" 
                       className="text-red-500 hover:text-red-600"
-                      onClick={() => setSelectedComponents(prev => ({ ...prev, PSU: null }))}
+                      onClick={() => removeFromBuild('PSU')}
                     >
                       Remove
                     </Button>
@@ -365,26 +336,26 @@ export default function CustomBuildPage() {
                     <a href="/products?category=CASE">Select Case</a>
                   </Button>
                 </div>
-                {selectedComponents.CASE ? (
+                {components.CASE ? (
                   <div className="flex items-start gap-4">
-                    {selectedComponents.CASE.image && (
+                    {components.CASE.image && (
                       <div className="relative w-20 h-20">
                         <Image
-                          src={selectedComponents.CASE.image}
-                          alt={selectedComponents.CASE.name}
+                          src={components.CASE.image}
+                          alt={components.CASE.name}
                           fill
                           className="object-contain"
                         />
                       </div>
                     )}
                     <div className="flex-1">
-                      <h3 className="font-medium">{selectedComponents.CASE.name}</h3>
-                      <p className="text-sm text-muted-foreground">${selectedComponents.CASE.price}</p>
+                      <h3 className="font-medium">{components.CASE.name}</h3>
+                      <p className="text-sm text-muted-foreground">${components.CASE.price}</p>
                     </div>
                     <Button 
                       variant="ghost" 
                       className="text-red-500 hover:text-red-600"
-                      onClick={() => setSelectedComponents(prev => ({ ...prev, CASE: null }))}
+                      onClick={() => removeFromBuild('CASE')}
                     >
                       Remove
                     </Button>
@@ -400,7 +371,7 @@ export default function CustomBuildPage() {
               <Card className="p-6 sticky top-24">
                 <h2 className="text-xl font-semibold mb-4">Build Summary</h2>
                 <div className="space-y-4">
-                  {Object.entries(selectedComponents).map(([category, component]) => (
+                  {Object.entries(components).map(([category, component]) => (
                     component && (
                       <div key={category} className="flex justify-between">
                         <span className="text-sm text-muted-foreground">{category}</span>
@@ -413,13 +384,13 @@ export default function CustomBuildPage() {
                   
                   <div className="flex justify-between font-bold">
                     <span>Total</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
+                    <span>${buildTotal.toFixed(2)}</span>
                   </div>
 
                   <Button 
                     className="w-full" 
                     onClick={addAllToCart}
-                    disabled={Object.values(selectedComponents).every(comp => comp === null)}
+                    disabled={Object.values(components).every(comp => comp === null)}
                   >
                     Add All to Cart
                   </Button>

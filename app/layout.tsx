@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { CartProvider } from "@/lib/cart";
+import { BuildProvider } from "@/lib/build";
 import { ToastProvider } from "@/components/toast-provider";
 
 const geistSans = Geist({
@@ -38,10 +39,12 @@ export default function RootLayout({
           storageKey="computerhut-theme"
         >
           <CartProvider>
-            <ToastProvider />
-            <div id="root">
-              {children}
-            </div>
+            <BuildProvider>
+              <ToastProvider />
+              <div id="root">
+                {children}
+              </div>
+            </BuildProvider>
           </CartProvider>
         </ThemeProvider>
       </body>
