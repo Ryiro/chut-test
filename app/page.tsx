@@ -13,24 +13,24 @@ const featuredBuilds = [
     id: 1,
     name: "Titan X Gaming",
     description: "RTX 4090, Intel i9-14900K, 64GB DDR5, 2TB NVMe",
-    price: 3999,
-    image: "/product-images/1742114739120-gpu5-removebg-preview.png",
+    price: 331917,
+    image: "https://images.unsplash.com/photo-1632772775778-e569e131c02e?q=80&w=1000&auto=format&fit=crop",
     specs: ["RTX 4090 24GB", "Intel i9-14900K", "64GB DDR5 6000MHz", "2TB NVMe Gen4"]
   },
   {
     id: 2,
     name: "Pro Creator",
     description: "RTX 4080, Ryzen 9 7950X, 128GB DDR5, 4TB Storage",
-    price: 3499,
-    image: "/product-images/1742081844710-cpu6.png",
+    price: 290417,
+    image: "https://images.unsplash.com/photo-1625842268584-8f3296236761?q=80&w=1000&auto=format&fit=crop",
     specs: ["RTX 4080 16GB", "Ryzen 9 7950X", "128GB DDR5 5600MHz", "4TB NVMe RAID"]
   },
   {
     id: 3,
     name: "Elite Workstation",
     description: "RTX 4070 Ti, Intel i7-14700K, 32GB DDR5, 2TB Storage",
-    price: 2499,
-    image: "/product-images/1742081834399-cpu3-removebg-preview.png",
+    price: 207417,
+    image: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?q=80&w=1000&auto=format&fit=crop",
     specs: ["RTX 4070 Ti 12GB", "Intel i7-14700K", "32GB DDR5 5200MHz", "2TB NVMe Gen4"]
   }
 ]
@@ -91,7 +91,9 @@ export default function Home() {
                         src={build.image}
                         alt={build.name}
                         fill
-                        className="object-contain"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover rounded-lg"
+                        priority={build.id === 1}
                       />
                     </div>
                     <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{build.name}</h3>
@@ -107,7 +109,7 @@ export default function Home() {
                       ))}
                     </ul>
                     <div className="flex items-center justify-between mt-auto">
-                      <span className="text-2xl font-bold text-gray-900 dark:text-white">${build.price}</span>
+                      <span className="text-2xl font-bold text-gray-900 dark:text-white">₹{build.price.toLocaleString('en-IN')}</span>
                       <Button asChild>
                         <Link href={`/custom-build?template=${build.id}`}>Configure</Link>
                       </Button>

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useState } from 'react'
@@ -22,34 +23,19 @@ export default function Header() {
   const { itemCount } = useCart()
   
   return (
-    <header className="bg-[#1a365d] dark:bg-[#1e3a5f] sticky top-0 z-50 w-full border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-[#1a365d]/80 dark:supports-[backdrop-filter]:bg-[#1e3a5f]/80">
+    <header className="bg-[#0f172a] dark:bg-[#121f3a] sticky top-0 z-50 w-full border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-[#0f172a]/80 dark:supports-[backdrop-filter]:bg-[#121f3a]/80">
       {/* First section with logo, search, and utility buttons */}
-      <div className="bg-[#1a365d] dark:bg-[#1e3a5f] border-b border-border/40">
+      <div className="bg-[#0f172a] dark:bg-[#121f3a] border-b border-border/40">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="24" 
-                height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className="text-white h-8 w-8"
-              >
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <path d="M4 9h16" />
-                <path d="M6 14h.01" />
-                <path d="M6 17h.01" />
-                <path d="M14 14h.01" />
-                <path d="M14 17h.01" />
-                <path d="M10 14h.01" />
-                <path d="M10 17h.01" />
-                <path d="M4 4v16" />
-              </svg>
+              <Image 
+                src="/logo/logo.png"
+                alt="ComputerHut Logo"
+                className="h-10 w-auto"
+                height={40}
+                width={40}
+              />
               <span className="ml-2 text-xl font-bold text-white">ComputerHut</span>
             </Link>
           </div>
@@ -220,12 +206,12 @@ export default function Header() {
       </div>
 
       {/* Second section with navigation */}
-      <div className="bg-[#15294a] dark:bg-[#182f51]">
+      <div className="bg-[#1e3b6f] dark:bg-[#234578]">
         <div className="container mx-auto px-4 md:px-6">
           <NavigationMenu className="hidden md:flex h-12">
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent hover:bg-transparent text-white/80 hover:text-white">Products</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="bg-transparent hover:bg-transparent text-gray-200 hover:text-white">Products</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="grid gap-3 p-4 w-[400px]">
                     <div className="grid grid-cols-2 gap-4">
@@ -270,7 +256,7 @@ export default function Header() {
 
               <NavigationMenuItem>
                 <Link href="/about" legacyBehavior passHref>
-                  <NavigationMenuLink className="nav-menu-link">
+                  <NavigationMenuLink className="nav-menu-link !text-gray-200/90 hover:!text-black dark:hover:!text-white">
                     About
                   </NavigationMenuLink>
                 </Link>
@@ -278,7 +264,7 @@ export default function Header() {
 
               <NavigationMenuItem>
                 <Link href="/support" legacyBehavior passHref>
-                  <NavigationMenuLink className="nav-menu-link">
+                  <NavigationMenuLink className="nav-menu-link !text-gray-200/90 hover:!text-black dark:hover:!text-white">
                     Support
                   </NavigationMenuLink>
                 </Link>
@@ -286,7 +272,7 @@ export default function Header() {
 
               <NavigationMenuItem>
                 <Link href="/custom-build" legacyBehavior passHref>
-                  <NavigationMenuLink className="nav-menu-link">
+                  <NavigationMenuLink className="nav-menu-link !text-gray-200/90 hover:!text-black dark:hover:!text-white">
                     Build Your PC
                   </NavigationMenuLink>
                 </Link>
@@ -297,7 +283,7 @@ export default function Header() {
       </div>
       
       {/* Mobile menu */}
-      <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:hidden p-4 border-t border-white/10 w-full bg-[#15294a] dark:bg-[#182f51]`}>
+      <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:hidden p-4 border-t border-white/10 w-full bg-[#1e3b6f] dark:bg-[#234578]`}>
         <div className="flex flex-col space-y-4">
           {/* Mobile search */}
           <div className="relative">
