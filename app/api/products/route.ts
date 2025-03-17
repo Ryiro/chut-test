@@ -5,21 +5,20 @@ import { ComponentCategory } from '@prisma/client';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, price, stock, category, specs, image } = body;
 
     // Create the specific spec based on category
     let specId = null;
-    switch (category) {
+    switch (body.category) {
       case 'CPU':
         const cpuSpec = await prisma.cpuSpec.create({
           data: {
-            brand: specs.brand,
-            cores: parseInt(specs.cores),
-            threads: parseInt(specs.threads),
-            baseSpeed: parseFloat(specs.baseSpeed),
-            boostSpeed: specs.boostSpeed ? parseFloat(specs.boostSpeed) : null,
-            socket: specs.socket,
-            tdp: parseInt(specs.tdp),
+            brand: body.specs.brand,
+            cores: parseInt(body.specs.cores),
+            threads: parseInt(body.specs.threads),
+            baseSpeed: parseFloat(body.specs.baseSpeed),
+            boostSpeed: body.specs.boostSpeed ? parseFloat(body.specs.boostSpeed) : null,
+            socket: body.specs.socket,
+            tdp: parseInt(body.specs.tdp),
           },
         });
         specId = { cpuSpecId: cpuSpec.id };
@@ -27,12 +26,12 @@ export async function POST(req: Request) {
       case 'GPU':
         const gpuSpec = await prisma.gpuSpec.create({
           data: {
-            brand: specs.brand,
-            memory: parseInt(specs.memory),
-            memoryType: specs.memoryType,
-            coreClock: parseFloat(specs.coreClock),
-            boostClock: specs.boostClock ? parseFloat(specs.boostClock) : null,
-            tdp: parseInt(specs.tdp),
+            brand: body.specs.brand,
+            memory: parseInt(body.specs.memory),
+            memoryType: body.specs.memoryType,
+            coreClock: parseFloat(body.specs.coreClock),
+            boostClock: body.specs.boostClock ? parseFloat(body.specs.boostClock) : null,
+            tdp: parseInt(body.specs.tdp),
           },
         });
         specId = { gpuSpecId: gpuSpec.id };
@@ -40,10 +39,10 @@ export async function POST(req: Request) {
       case 'RAM':
         const ramSpec = await prisma.ramSpec.create({
           data: {
-            capacity: parseInt(specs.capacity),
-            speed: parseInt(specs.speed),
-            type: specs.type,
-            timing: specs.timing,
+            capacity: parseInt(body.specs.capacity),
+            speed: parseInt(body.specs.speed),
+            type: body.specs.type,
+            timing: body.specs.timing,
           },
         });
         specId = { ramSpecId: ramSpec.id };
@@ -51,11 +50,11 @@ export async function POST(req: Request) {
       case 'STORAGE':
         const storageSpec = await prisma.storageSpec.create({
           data: {
-            type: specs.type,
-            capacity: parseInt(specs.capacity),
-            interface: specs.interface,
-            readSpeed: specs.readSpeed ? parseInt(specs.readSpeed) : null,
-            writeSpeed: specs.writeSpeed ? parseInt(specs.writeSpeed) : null,
+            type: body.specs.type,
+            capacity: parseInt(body.specs.capacity),
+            interface: body.specs.interface,
+            readSpeed: body.specs.readSpeed ? parseInt(body.specs.readSpeed) : null,
+            writeSpeed: body.specs.writeSpeed ? parseInt(body.specs.writeSpeed) : null,
           },
         });
         specId = { storageSpecId: storageSpec.id };
@@ -63,11 +62,11 @@ export async function POST(req: Request) {
       case 'MOTHERBOARD':
         const motherboardSpec = await prisma.motherboardSpec.create({
           data: {
-            socket: specs.socket,
-            chipset: specs.chipset,
-            formFactor: specs.formFactor,
-            memoryMax: parseInt(specs.memoryMax),
-            memorySlots: parseInt(specs.memorySlots),
+            socket: body.specs.socket,
+            chipset: body.specs.chipset,
+            formFactor: body.specs.formFactor,
+            memoryMax: parseInt(body.specs.memoryMax),
+            memorySlots: parseInt(body.specs.memorySlots),
           },
         });
         specId = { motherboardSpecId: motherboardSpec.id };
@@ -75,9 +74,9 @@ export async function POST(req: Request) {
       case 'PSU':
         const psuSpec = await prisma.psuSpec.create({
           data: {
-            wattage: parseInt(specs.wattage),
-            efficiency: specs.efficiency,
-            modular: Boolean(specs.modular),
+            wattage: parseInt(body.specs.wattage),
+            efficiency: body.specs.efficiency,
+            modular: Boolean(body.specs.modular),
           },
         });
         specId = { psuSpecId: psuSpec.id };
@@ -85,9 +84,9 @@ export async function POST(req: Request) {
       case 'CASE':
         const caseSpec = await prisma.caseSpec.create({
           data: {
-            formFactor: specs.formFactor,
-            maxGpuLength: parseInt(specs.maxGpuLength),
-            maxCpuHeight: parseInt(specs.maxCpuHeight),
+            formFactor: body.specs.formFactor,
+            maxGpuLength: parseInt(body.specs.maxGpuLength),
+            maxCpuHeight: parseInt(body.specs.maxCpuHeight),
           },
         });
         specId = { caseSpecId: caseSpec.id };
@@ -95,13 +94,13 @@ export async function POST(req: Request) {
       case 'COOLER':
         const coolerSpec = await prisma.coolerSpec.create({
           data: {
-            type: specs.type,
-            height: parseInt(specs.height),
-            radiatorSize: specs.radiatorSize ? parseInt(specs.radiatorSize) : null,
-            fanSize: parseInt(specs.fanSize),
-            fanCount: parseInt(specs.fanCount),
-            tdp: parseInt(specs.tdp),
-            socket: specs.socket,
+            type: body.specs.type,
+            height: parseInt(body.specs.height),
+            radiatorSize: body.specs.radiatorSize ? parseInt(body.specs.radiatorSize) : null,
+            fanSize: parseInt(body.specs.fanSize),
+            fanCount: parseInt(body.specs.fanCount),
+            tdp: parseInt(body.specs.tdp),
+            socket: body.specs.socket,
           },
         });
         specId = { coolerSpecId: coolerSpec.id };
@@ -113,22 +112,23 @@ export async function POST(req: Request) {
     // Create the product with the associated spec
     const product = await prisma.product.create({
       data: {
-        name,
-        price: parseFloat(price),
-        stock: parseInt(stock),
-        category,
-        image, // Now just store the image path that was uploaded separately
-        ...specId,
+        name: body.name,
+        description: body.description,
+        price: parseFloat(body.price),
+        stock: parseInt(body.stock),
+        category: body.category,
+        image: body.image,
+        ...specId
       },
       include: {
-        cpuSpec: category === 'CPU',
-        gpuSpec: category === 'GPU',
-        ramSpec: category === 'RAM',
-        storageSpec: category === 'STORAGE',
-        motherboardSpec: category === 'MOTHERBOARD',
-        psuSpec: category === 'PSU',
-        caseSpec: category === 'CASE',
-        coolerSpec: category === 'COOLER',
+        cpuSpec: body.category === 'CPU',
+        gpuSpec: body.category === 'GPU',
+        ramSpec: body.category === 'RAM',
+        storageSpec: body.category === 'STORAGE',
+        motherboardSpec: body.category === 'MOTHERBOARD',
+        psuSpec: body.category === 'PSU',
+        caseSpec: body.category === 'CASE',
+        coolerSpec: body.category === 'COOLER',
       },
     });
 

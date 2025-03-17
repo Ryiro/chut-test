@@ -8,29 +8,7 @@ export async function GET(request: Request) {
     const query = searchParams.get('q');
 
     if (!query) {
-      const products = await prisma.product.findMany({
-        take: 20,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          name: true,
-          price: true,
-          stock: true,
-          category: true,
-          image: true,
-          createdAt: true,
-          updatedAt: true,
-          cpuSpec: true,
-          gpuSpec: true,
-          ramSpec: true,
-          storageSpec: true,
-          motherboardSpec: true,
-          psuSpec: true,
-          caseSpec: true,
-          coolerSpec: true,
-        },
-      });
-      return NextResponse.json(products);
+      return NextResponse.json({ error: 'Search query is required' }, { status: 400 });
     }
 
     const searchQuery = query.trim();
@@ -45,6 +23,11 @@ export async function GET(request: Request) {
           OR: [
             {
               name: {
+                contains: searchQuery,
+              },
+            },
+            {
+              description: {
                 contains: searchQuery,
               },
             },

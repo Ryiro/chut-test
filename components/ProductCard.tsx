@@ -14,6 +14,7 @@ type ProductCardProps = {
   product: {
     id: string
     name: string
+    description?: string
     price: number
     stock: number
     category: ComponentCategory
@@ -52,6 +53,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     const buildItem = {
       id: product.id,
       name: product.name,
+      description: product.description,
       price: product.price,
       image: product.image || undefined,
       category: product.category,
@@ -61,6 +63,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       addToBuild(buildItem)
       setIsAddingToBuild(false)
       toast.success(`${product.name} added to build`)
+      window.location.href = '/custom-build'
     }, 300)
   }
   
@@ -97,9 +100,12 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
       <div className="p-4">
         <h2 className="font-semibold mb-2">{product.name}</h2>
+        {product.description && (
+          <p className="text-sm text-muted-foreground mb-3">{product.description}</p>
+        )}
         <p className="text-sm text-muted-foreground mb-2">Category: {product.category}</p>
         <div className="flex justify-between items-center">
-          <span className="text-lg font-bold">${product.price}</span>
+          <span className="text-lg font-bold">₹{product.price.toLocaleString()}</span>
           <span className={`text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
             {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
           </span>

@@ -6,6 +6,7 @@ import { ComponentCategory } from '@prisma/client'
 export type BuildItem = {
   id: string
   name: string
+  description?: string
   price: number
   image?: string
   category: ComponentCategory

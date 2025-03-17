@@ -88,6 +88,7 @@ interface CoolerSpec extends Spec {
 interface Product {
   id: string;
   name: string;
+  description: string;
   price: number;
   stock: number;
   category: ComponentCategory;
@@ -123,6 +124,7 @@ export default function AdminPage() {
   
   const [formData, setFormData] = useState({
     name: '',
+    description: '', // Add description field
     price: '',
     stock: '',
     image: '',
@@ -304,6 +306,7 @@ export default function AdminPage() {
         // Reset form and image preview
         setFormData({
           name: '',
+          description: '',
           price: '',
           stock: '',
           image: '',
@@ -878,6 +881,16 @@ export default function AdminPage() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(e, 'description')}
+                  placeholder="Optional product description"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Price</Label>
@@ -1014,7 +1027,7 @@ export default function AdminPage() {
                       <div>
                         <h3 className="font-medium">{product.name}</h3>
                         <p className="text-sm text-gray-500">Category: {product.category}</p>
-                        <p className="text-sm">Price: ${product.price.toFixed(2)}</p>
+                        <p className="text-sm">Price: ₹{product.price.toFixed(2)}</p>
                         <p className="text-sm">Stock: {product.stock}</p>
                       </div>
                       <div className="flex gap-2">

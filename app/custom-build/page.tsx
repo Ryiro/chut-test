@@ -66,8 +66,11 @@ export default function CustomBuildPage() {
                         )}
                         <div className="flex-1">
                           <h3 className="text-sm font-medium">{components.CPU.name}</h3>
+                          {components.CPU.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{components.CPU.description}</p>
+                          )}
                         </div>
-                        <div className="text-sm font-medium w-20 text-right">${components.CPU.price}</div>
+                        <div className="text-sm font-medium w-20 text-right">₹{components.CPU.price.toLocaleString()}</div>
                         <Button 
                           variant="ghost" 
                           className="text-red-500 hover:text-red-600 ml-2"
@@ -108,8 +111,11 @@ export default function CustomBuildPage() {
                         )}
                         <div className="flex-1">
                           <h3 className="text-sm font-medium">{components.GPU.name}</h3>
+                          {components.GPU.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{components.GPU.description}</p>
+                          )}
                         </div>
-                        <div className="text-sm font-medium w-20 text-right">${components.GPU.price}</div>
+                        <div className="text-sm font-medium w-20 text-right">₹{components.GPU.price.toLocaleString()}</div>
                         <Button 
                           variant="ghost" 
                           className="text-red-500 hover:text-red-600 ml-2"
@@ -150,8 +156,11 @@ export default function CustomBuildPage() {
                         )}
                         <div className="flex-1">
                           <h3 className="text-sm font-medium">{components.MOTHERBOARD.name}</h3>
+                          {components.MOTHERBOARD.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{components.MOTHERBOARD.description}</p>
+                          )}
                         </div>
-                        <div className="text-sm font-medium w-20 text-right">${components.MOTHERBOARD.price}</div>
+                        <div className="text-sm font-medium w-20 text-right">₹{components.MOTHERBOARD.price.toLocaleString()}</div>
                         <Button 
                           variant="ghost" 
                           className="text-red-500 hover:text-red-600 ml-2"
@@ -192,8 +201,11 @@ export default function CustomBuildPage() {
                         )}
                         <div className="flex-1">
                           <h3 className="text-sm font-medium">{components.RAM.name}</h3>
+                          {components.RAM.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{components.RAM.description}</p>
+                          )}
                         </div>
-                        <div className="text-sm font-medium w-20 text-right">${components.RAM.price}</div>
+                        <div className="text-sm font-medium w-20 text-right">₹{components.RAM.price.toLocaleString()}</div>
                         <Button 
                           variant="ghost" 
                           className="text-red-500 hover:text-red-600 ml-2"
@@ -234,8 +246,11 @@ export default function CustomBuildPage() {
                         )}
                         <div className="flex-1">
                           <h3 className="text-sm font-medium">{components.STORAGE.name}</h3>
+                          {components.STORAGE.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{components.STORAGE.description}</p>
+                          )}
                         </div>
-                        <div className="text-sm font-medium w-20 text-right">${components.STORAGE.price}</div>
+                        <div className="text-sm font-medium w-20 text-right">₹{components.STORAGE.price.toLocaleString()}</div>
                         <Button 
                           variant="ghost" 
                           className="text-red-500 hover:text-red-600 ml-2"
@@ -276,8 +291,11 @@ export default function CustomBuildPage() {
                         )}
                         <div className="flex-1">
                           <h3 className="text-sm font-medium">{components.COOLER.name}</h3>
+                          {components.COOLER.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{components.COOLER.description}</p>
+                          )}
                         </div>
-                        <div className="text-sm font-medium w-20 text-right">${components.COOLER.price}</div>
+                        <div className="text-sm font-medium w-20 text-right">₹{components.COOLER.price.toLocaleString()}</div>
                         <Button 
                           variant="ghost" 
                           className="text-red-500 hover:text-red-600 ml-2"
@@ -318,8 +336,11 @@ export default function CustomBuildPage() {
                         )}
                         <div className="flex-1">
                           <h3 className="text-sm font-medium">{components.PSU.name}</h3>
+                          {components.PSU.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{components.PSU.description}</p>
+                          )}
                         </div>
-                        <div className="text-sm font-medium w-20 text-right">${components.PSU.price}</div>
+                        <div className="text-sm font-medium w-20 text-right">₹{components.PSU.price.toLocaleString()}</div>
                         <Button 
                           variant="ghost" 
                           className="text-red-500 hover:text-red-600 ml-2"
@@ -360,8 +381,11 @@ export default function CustomBuildPage() {
                         )}
                         <div className="flex-1">
                           <h3 className="text-sm font-medium">{components.CASE.name}</h3>
+                          {components.CASE.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{components.CASE.description}</p>
+                          )}
                         </div>
-                        <div className="text-sm font-medium w-20 text-right">${components.CASE.price}</div>
+                        <div className="text-sm font-medium w-20 text-right">₹{components.CASE.price.toLocaleString()}</div>
                         <Button 
                           variant="ghost" 
                           className="text-red-500 hover:text-red-600 ml-2"
@@ -421,7 +445,7 @@ export default function CustomBuildPage() {
                     component && (
                       <div key={category} className="flex justify-between">
                         <span className="text-sm text-muted-foreground">{category}</span>
-                        <span className="font-medium">${component.price}</span>
+                        <span className="font-medium">₹{component.price.toLocaleString()}</span>
                       </div>
                     )
                   ))}
@@ -430,7 +454,7 @@ export default function CustomBuildPage() {
                   
                   <div className="flex justify-between font-bold">
                     <span>Total</span>
-                    <span>${buildTotal.toFixed(2)}</span>
+                    <span>₹{buildTotal.toLocaleString()}</span>
                   </div>
 
                   <Button 

@@ -14,7 +14,7 @@ const featuredBuilds = [
     name: "Titan X Gaming",
     description: "RTX 4090, Intel i9-14900K, 64GB DDR5, 2TB NVMe",
     price: 331917,
-    image: "https://images.unsplash.com/photo-1632772775778-e569e131c02e?q=80&w=1000&auto=format&fit=crop",
+    image: "/product-images/1742114739120-gpu5-removebg-preview.png",
     specs: ["RTX 4090 24GB", "Intel i9-14900K", "64GB DDR5 6000MHz", "2TB NVMe Gen4"]
   },
   {
@@ -22,7 +22,7 @@ const featuredBuilds = [
     name: "Pro Creator",
     description: "RTX 4080, Ryzen 9 7950X, 128GB DDR5, 4TB Storage",
     price: 290417,
-    image: "https://images.unsplash.com/photo-1625842268584-8f3296236761?q=80&w=1000&auto=format&fit=crop",
+    image: "/product-images/1742081844710-cpu6.png",
     specs: ["RTX 4080 16GB", "Ryzen 9 7950X", "128GB DDR5 5600MHz", "4TB NVMe RAID"]
   },
   {
@@ -30,7 +30,7 @@ const featuredBuilds = [
     name: "Elite Workstation",
     description: "RTX 4070 Ti, Intel i7-14700K, 32GB DDR5, 2TB Storage",
     price: 207417,
-    image: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?q=80&w=1000&auto=format&fit=crop",
+    image: "/product-images/1742115220879-gpu1-removebg-preview.png",
     specs: ["RTX 4070 Ti 12GB", "Intel i7-14700K", "32GB DDR5 5200MHz", "2TB NVMe Gen4"]
   }
 ]
@@ -108,11 +108,15 @@ export default function Home() {
                         </li>
                       ))}
                     </ul>
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-2xl font-bold text-gray-900 dark:text-white">₹{build.price.toLocaleString('en-IN')}</span>
-                      <Button asChild>
-                        <Link href={`/custom-build?template=${build.id}`}>Configure</Link>
-                      </Button>
+                    <div className="flex flex-col gap-2">
+                      <h3 className="font-bold text-xl">{build.name}</h3>
+                      <p className="text-muted-foreground text-sm">{build.description}</p>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-lg font-bold">₹{build.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</span>
+                        <Button asChild>
+                          <a href="/custom-build">Configure</a>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </Card>
