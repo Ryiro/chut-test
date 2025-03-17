@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react'
 import { ComponentCategory } from '@prisma/client'
 
 export type BuildItem = {
@@ -17,6 +17,8 @@ type BuildContextType = {
   removeFromBuild: (category: ComponentCategory) => void
   clearBuild: () => void
   buildTotal: number
+  isCompatible: boolean
+  compatibilityMessage: string
 }
 
 const BuildContext = createContext<BuildContextType | undefined>(undefined)
@@ -32,7 +34,10 @@ export function BuildProvider({ children }: { children: ReactNode }) {
     PSU: null,
     CASE: null,
   })
-  
+
+  const [isCompatible, setIsCompatible] = useState(true)
+  const [compatibilityMessage, setCompatibilityMessage] = useState('')
+
   // Load build from localStorage on mount
   useEffect(() => {
     try {
@@ -59,6 +64,9 @@ export function BuildProvider({ children }: { children: ReactNode }) {
       ...prev,
       [item.category]: item
     }))
+    // You can add your compatibility logic here later
+    setIsCompatible(true)
+    setCompatibilityMessage('')
   }
 
   const removeFromBuild = (category: ComponentCategory) => {
@@ -66,6 +74,9 @@ export function BuildProvider({ children }: { children: ReactNode }) {
       ...prev,
       [category]: null
     }))
+    // You can update compatibility status here when components are removed
+    setIsCompatible(true)
+    setCompatibilityMessage('')
   }
 
   const clearBuild = () => {
@@ -81,8 +92,11 @@ export function BuildProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const buildTotal = Object.values(components)
-    .reduce((total, item) => total + (item?.price || 0), 0)
+  const buildTotal = useMemo(() => {
+    return Object.values(components)
+      .filter((item): item is BuildItem => item !== null)
+      .reduce((total, item) => total + item.price, 0)
+  }, [components])
 
   return (
     <BuildContext.Provider value={{
@@ -90,7 +104,9 @@ export function BuildProvider({ children }: { children: ReactNode }) {
       addToBuild,
       removeFromBuild,
       clearBuild,
-      buildTotal
+      buildTotal,
+      isCompatible,
+      compatibilityMessage
     }}>
       {children}
     </BuildContext.Provider>
