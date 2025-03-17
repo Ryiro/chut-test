@@ -336,6 +336,26 @@ export default function AdminPage() {
     }
   };
 
+  const socketOptions = {
+    Intel: [
+      'LGA 1700',
+      'LGA 1200',
+      'LGA 1151',
+      'LGA 1150',
+      'LGA 1155',
+      'LGA 2066',
+      'LGA 4677'
+    ],
+    AMD: [
+      'AM5',
+      'AM4',
+      'AM3+',
+      'TR4',
+      'sTRX4',
+      'SP3'
+    ]
+  };
+
   const renderSpecFields = () => {
     switch (category) {
       case 'CPU':
@@ -343,11 +363,45 @@ export default function AdminPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Brand</Label>
-              <Input
-                type="text"
-                value={formData.specs.brand}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(e, 'brand', true)}
-              />
+              <div className="flex gap-2">
+                <Select
+                  value={formData.specs.brand === 'AMD' || formData.specs.brand === 'Intel' ? formData.specs.brand : 'other'}
+                  onValueChange={(value) => {
+                    if (value === 'other') {
+                      setFormData({
+                        ...formData,
+                        specs: { ...formData.specs, brand: '', socket: '' }
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        specs: { ...formData.specs, brand: value, socket: '' }
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select brand" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="AMD">AMD</SelectItem>
+                    <SelectItem value="Intel">Intel</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                {(formData.specs.brand !== 'AMD' && formData.specs.brand !== 'Intel') && (
+                  <Input
+                    type="text"
+                    value={formData.specs.brand}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      specs: { ...formData.specs, brand: e.target.value }
+                    })}
+                    placeholder="Enter brand name"
+                    className="flex-1"
+                  />
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Cores</Label>
@@ -397,14 +451,58 @@ export default function AdminPage() {
             </div>
             <div className="space-y-2">
               <Label>Socket</Label>
-              <Input
-                type="text"
-                value={formData.specs.socket}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  specs: { ...formData.specs, socket: e.target.value }
-                })}
-              />
+              <div className="flex gap-2">
+                <Select
+                  value={formData.specs.socket}
+                  onValueChange={(value) => {
+                    if (value === 'other') {
+                      setFormData({
+                        ...formData,
+                        specs: { ...formData.specs, socket: '' }
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        specs: { ...formData.specs, socket: value }
+                      });
+                    }
+                  }}
+                  disabled={!formData.specs.brand || (formData.specs.brand !== 'AMD' && formData.specs.brand !== 'Intel')}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select socket" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.specs.brand === 'Intel' && (
+                      socketOptions.Intel.map(socket => (
+                        <SelectItem key={socket} value={socket}>
+                          {socket}
+                        </SelectItem>
+                      ))
+                    )}
+                    {formData.specs.brand === 'AMD' && (
+                      socketOptions.AMD.map(socket => (
+                        <SelectItem key={socket} value={socket}>
+                          {socket}
+                        </SelectItem>
+                      ))
+                    )}
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                {(formData.specs.socket === '' || (!socketOptions.Intel.includes(formData.specs.socket) && !socketOptions.AMD.includes(formData.specs.socket))) && (
+                  <Input
+                    type="text"
+                    value={formData.specs.socket}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      specs: { ...formData.specs, socket: e.target.value }
+                    })}
+                    placeholder="Enter socket type"
+                    className="flex-1"
+                  />
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label>TDP (W)</Label>
