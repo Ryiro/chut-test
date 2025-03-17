@@ -13,7 +13,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
+  // navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 
 export default function Header() {
@@ -225,7 +225,7 @@ export default function Header() {
           <NavigationMenu className="hidden md:flex h-12">
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Products</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="bg-transparent hover:bg-transparent text-white/80 hover:text-white">Products</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="grid gap-3 p-4 w-[400px]">
                     <div className="grid grid-cols-2 gap-4">
@@ -270,7 +270,7 @@ export default function Header() {
 
               <NavigationMenuItem>
                 <Link href="/about" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  <NavigationMenuLink className="nav-menu-link">
                     About
                   </NavigationMenuLink>
                 </Link>
@@ -278,7 +278,7 @@ export default function Header() {
 
               <NavigationMenuItem>
                 <Link href="/support" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  <NavigationMenuLink className="nav-menu-link">
                     Support
                   </NavigationMenuLink>
                 </Link>
@@ -286,7 +286,7 @@ export default function Header() {
 
               <NavigationMenuItem>
                 <Link href="/custom-build" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  <NavigationMenuLink className="nav-menu-link">
                     Build Your PC
                   </NavigationMenuLink>
                 </Link>
