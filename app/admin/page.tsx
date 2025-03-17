@@ -522,14 +522,46 @@ export default function AdminPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Brand</Label>
-              <Input
-                type="text"
-                value={formData.specs.brand}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  specs: { ...formData.specs, brand: e.target.value }
-                })}
-              />
+              <div className="flex gap-2">
+                <Select
+                  value={formData.specs.brand === 'NVIDIA' || formData.specs.brand === 'AMD' || formData.specs.brand === 'Intel' ? formData.specs.brand : 'other'}
+                  onValueChange={(value) => {
+                    if (value === 'other') {
+                      setFormData({
+                        ...formData,
+                        specs: { ...formData.specs, brand: '' }
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        specs: { ...formData.specs, brand: value }
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select brand" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NVIDIA">NVIDIA</SelectItem>
+                    <SelectItem value="AMD">AMD</SelectItem>
+                    <SelectItem value="Intel">Intel</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                {(formData.specs.brand !== 'NVIDIA' && formData.specs.brand !== 'AMD' && formData.specs.brand !== 'Intel') && (
+                  <Input
+                    type="text"
+                    value={formData.specs.brand}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      specs: { ...formData.specs, brand: e.target.value }
+                    })}
+                    placeholder="Enter brand name"
+                    className="flex-1"
+                  />
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Memory (GB)</Label>
