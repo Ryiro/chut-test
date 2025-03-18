@@ -1,7 +1,13 @@
 import { Suspense } from 'react'
+import { Metadata } from 'next'
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import ProductsContent from '@/components/ProductsContent'
+
+export const metadata: Metadata = {
+  title: 'Products',
+  description: 'Browse our products'
+}
 
 // Separate loading component for better UX
 function ProductsLoading() {
