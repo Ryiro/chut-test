@@ -1856,19 +1856,19 @@ export default function AdminPage() {
             value="add" 
             className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-950 data-[state=active]:shadow-sm h-11 hover:bg-white/90 dark:hover:bg-gray-950/90 transition-colors"
           >
-            Add Product
+            Add
           </TabsTrigger>
           <TabsTrigger 
             value="search" 
             className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-950 data-[state=active]:shadow-sm h-11 hover:bg-white/90 dark:hover:bg-gray-950/90 transition-colors"
           >
-            Search Products
+            Search
           </TabsTrigger>
           <TabsTrigger 
             value="users" 
             className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-950 data-[state=active]:shadow-sm h-11 hover:bg-white/90 dark:hover:bg-gray-950/90 transition-colors"
           >
-            User Information
+            Users
           </TabsTrigger>
         </TabsList>
 
