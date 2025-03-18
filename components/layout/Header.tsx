@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { useState } from 'react'
 import { useTheme } from 'next-themes'
 import { useCart } from '@/lib/cart'
+import { signOut, useSession } from 'next-auth/react'
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -19,8 +20,10 @@ import {
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const { itemCount } = useCart()
+  const { data: session } = useSession()
   
   return (
     <header className="bg-[#0f172a] dark:bg-[#121f3a] sticky top-0 z-50 w-full border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-[#0f172a]/80 dark:supports-[backdrop-filter]:bg-[#121f3a]/80">
@@ -113,28 +116,134 @@ export default function Header() {
               <span className="sr-only">Toggle theme</span>
             </Button>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-white/10"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-7 w-7"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-              </svg>
-              <span className="sr-only">Account</span>
-            </Button>
+            {/* User Account */}
+            <div className="relative">
+              {session ? (
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-white/10"
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  >
+                    {session.user?.image ? (
+                      <Image
+                        src={session.user.image}
+                        alt={session.user.name || "User"}
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-7 w-7"
+                      >
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                      </svg>
+                    )}
+                    <span className="sr-only">User account</span>
+                  </Button>
+
+                  {/* User dropdown menu */}
+                  {userMenuOpen && (
+                    <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                      <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {session.user?.name}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {session.user?.email}
+                        </p>
+                      </div>
+                      <Link
+                        href="/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        Your Profile
+                      </Link>
+                      <Link
+                        href="/orders"
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        Your Orders
+                      </Link>
+                      {session.user?.role === "ADMIN" && (
+                        <Link
+                          href="/admin"
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => {
+                          signOut({ callbackUrl: '/' });
+                          setUserMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-white/10 text-sm hidden sm:block"
+                    asChild
+                  >
+                    <Link href="/login">Log in</Link>
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="hidden sm:block"
+                    asChild
+                  >
+                    <Link href="/register">Sign up</Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-white/10 sm:hidden"
+                    asChild
+                  >
+                    <Link href="/login">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-7 w-7"
+                      >
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                      </svg>
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
 
             <Button
               variant="ghost"
@@ -339,6 +448,55 @@ export default function Header() {
           <Link href="/checkout" className="text-white/80 hover:text-white text-sm font-medium transition-colors flex items-center gap-2">
             Cart {itemCount > 0 && <span className="bg-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{itemCount}</span>}
           </Link>
+          
+          {/* Auth in mobile menu */}
+          {session ? (
+            <div className="border-t border-white/10 pt-2">
+              <div className="flex items-center gap-3 mb-2">
+                {session.user?.image && (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                )}
+                <div>
+                  <p className="text-white text-sm font-medium">{session.user?.name}</p>
+                  <p className="text-white/60 text-xs">{session.user?.email}</p>
+                </div>
+              </div>
+              <div className="space-y-1 pl-1">
+                <Link href="/profile" className="block text-white/80 hover:text-white text-sm transition-colors">
+                  Your Profile
+                </Link>
+                <Link href="/orders" className="block text-white/80 hover:text-white text-sm transition-colors">
+                  Your Orders
+                </Link>
+                {session.user?.role === "ADMIN" && (
+                  <Link href="/admin" className="block text-white/80 hover:text-white text-sm transition-colors">
+                    Admin Dashboard
+                  </Link>
+                )}
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="border-t border-white/10 pt-4 flex gap-3">
+              <Button asChild className="flex-1">
+                <Link href="/login">Log in</Link>
+              </Button>
+              <Button asChild variant="outline" className="flex-1">
+                <Link href="/register">Sign up</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </header>

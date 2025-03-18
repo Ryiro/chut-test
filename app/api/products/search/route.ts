@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/db';
 import { ComponentCategory, Prisma } from '@prisma/client';
 
 export async function GET(request: Request) {
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     const isValidCategory = Object.values(ComponentCategory).includes(upperQuery as ComponentCategory);
 
     try {
-      const products = await prisma.product.findMany({
+      const products = await db.product.findMany({
         where: {
           OR: [
             {

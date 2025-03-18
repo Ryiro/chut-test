@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/db';
 import { ComponentCategory } from '@prisma/client';
 
 export async function POST(req: Request) {
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     let specId = null;
     switch (body.category) {
       case 'CPU':
-        const cpuSpec = await prisma.cpuSpec.create({
+        const cpuSpec = await db.cpuSpec.create({
           data: {
             brand: body.specs.brand,
             cores: parseInt(body.specs.cores),
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         specId = { cpuSpecId: cpuSpec.id };
         break;
       case 'GPU':
-        const gpuSpec = await prisma.gpuSpec.create({
+        const gpuSpec = await db.gpuSpec.create({
           data: {
             brand: body.specs.brand,
             memory: parseInt(body.specs.memory),
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         specId = { gpuSpecId: gpuSpec.id };
         break;
       case 'RAM':
-        const ramSpec = await prisma.ramSpec.create({
+        const ramSpec = await db.ramSpec.create({
           data: {
             capacity: parseInt(body.specs.capacity),
             speed: parseInt(body.specs.speed),
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
         specId = { ramSpecId: ramSpec.id };
         break;
       case 'STORAGE':
-        const storageSpec = await prisma.storageSpec.create({
+        const storageSpec = await db.storageSpec.create({
           data: {
             type: body.specs.type,
             capacity: parseInt(body.specs.capacity),
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
         specId = { storageSpecId: storageSpec.id };
         break;
       case 'MOTHERBOARD':
-        const motherboardSpec = await prisma.motherboardSpec.create({
+        const motherboardSpec = await db.motherboardSpec.create({
           data: {
             socket: body.specs.socket,
             chipset: body.specs.chipset,
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
         specId = { motherboardSpecId: motherboardSpec.id };
         break;
       case 'PSU':
-        const psuSpec = await prisma.psuSpec.create({
+        const psuSpec = await db.psuSpec.create({
           data: {
             wattage: parseInt(body.specs.wattage),
             efficiency: body.specs.efficiency,
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
         specId = { psuSpecId: psuSpec.id };
         break;
       case 'CASE':
-        const caseSpec = await prisma.caseSpec.create({
+        const caseSpec = await db.caseSpec.create({
           data: {
             formFactor: body.specs.formFactor,
             maxGpuLength: parseInt(body.specs.maxGpuLength),
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
         specId = { caseSpecId: caseSpec.id };
         break;
       case 'COOLER':
-        const coolerSpec = await prisma.coolerSpec.create({
+        const coolerSpec = await db.coolerSpec.create({
           data: {
             type: body.specs.type,
             height: parseInt(body.specs.height),
@@ -110,7 +110,7 @@ export async function POST(req: Request) {
     }
 
     // Create the product with the associated spec
-    const product = await prisma.product.create({
+    const product = await db.product.create({
       data: {
         name: body.name,
         description: body.description,
@@ -147,7 +147,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
 
-    const products = await prisma.product.findMany({
+    const products = await db.product.findMany({
       where: category ? {
         category: category as ComponentCategory
       } : undefined,
