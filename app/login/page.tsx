@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,21 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const error = searchParams.get("error");
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    if (error === "OAuthAccountNotLinked") {
+      toast.error(
+        "An account with this email already exists. Please sign in with your existing account or use a different email address.",
+        {
+          duration: 6000,
+        }
+      );
+    }
+  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,16 +136,18 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <Suspense fallback={
-        <Card className="w-full max-w-md p-8">
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          </div>
-        </Card>
-      }>
-        <LoginForm />
-      </Suspense>
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md mx-auto">
+        <Suspense fallback={
+          <Card className="w-full p-8">
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          </Card>
+        }>
+          <LoginForm />
+        </Suspense>
+      </div>
+    </main>
   );
 }

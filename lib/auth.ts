@@ -91,7 +91,8 @@ export const authOptions: NextAuthConfig = {
       }
       return token;
     }
-  }
+  },
+  trustHost: true,
 };
 
 const { auth, handlers } = NextAuth(authOptions);
