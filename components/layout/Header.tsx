@@ -15,7 +15,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  // navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 
 export default function Header() {
@@ -24,12 +23,12 @@ export default function Header() {
   const { theme, setTheme } = useTheme()
   const { itemCount } = useCart()
   const { data: session } = useSession()
-  
+
   return (
     <header className="bg-[#0f172a] dark:bg-[#121f3a] sticky top-0 z-50 w-full border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-[#0f172a]/80 dark:supports-[backdrop-filter]:bg-[#121f3a]/80">
-      {/* First section with logo, search, and utility buttons */}
       <div className="bg-[#0f172a] dark:bg-[#121f3a] border-b border-border/40">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+          {/* Logo */}
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center">
               <Image 
@@ -201,47 +200,13 @@ export default function Header() {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    className="text-white hover:bg-white/10 text-sm hidden sm:block"
-                    asChild
-                  >
-                    <Link href="/login">Log in</Link>
-                  </Button>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="hidden sm:block"
-                    asChild
-                  >
-                    <Link href="/register">Sign up</Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-white/10 sm:hidden"
-                    asChild
-                  >
-                    <Link href="/login">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="h-7 w-7"
-                      >
-                        <circle cx="12" cy="8" r="4" />
-                        <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-                      </svg>
-                    </Link>
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  className="text-white hover:bg-white/10 text-sm"
+                  asChild
+                >
+                  <Link href="/login">Login/ Signup</Link>
+                </Button>
               )}
             </div>
 
@@ -488,12 +453,9 @@ export default function Header() {
               </div>
             </div>
           ) : (
-            <div className="border-t border-white/10 pt-4 flex gap-3">
-              <Button asChild className="flex-1">
-                <Link href="/login">Log in</Link>
-              </Button>
-              <Button asChild variant="outline" className="flex-1">
-                <Link href="/register">Sign up</Link>
+            <div className="border-t border-white/10 pt-4">
+              <Button asChild className="w-full">
+                <Link href="/login">Sign In</Link>
               </Button>
             </div>
           )}

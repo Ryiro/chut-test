@@ -56,6 +56,7 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?   // Hashed password for credentials provider
+  phone         String?   @unique  // Added for WhatsApp authentication
   role          UserRole  @default(USER)
   accounts      Account[]
   sessions      Session[]

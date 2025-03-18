@@ -5,13 +5,14 @@ import bcrypt from "bcrypt";
 import GoogleProvider from "next-auth/providers/google";
 import DiscordProvider from "next-auth/providers/discord";
 import CredentialsProvider from "next-auth/providers/credentials";
-import WhatsAppProvider from "./providers/whatsapp-provider";
 import { Adapter } from "next-auth/adapters";
 import NextAuth from "next-auth";
 
 declare module "next-auth" {
   interface User {
+    id?: string;
     role: "USER" | "ADMIN";
+    phone?: string | null;
   }
 }
 
@@ -31,10 +32,6 @@ export const authOptions: NextAuthConfig = {
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-    }),
-    WhatsAppProvider({
-      clientId: process.env.WHATSAPP_CLIENT_ID!,
-      clientSecret: process.env.WHATSAPP_CLIENT_SECRET!,
     }),
     CredentialsProvider({
       name: "credentials",
@@ -72,6 +69,7 @@ export const authOptions: NextAuthConfig = {
           name: user.name,
           image: user.image,
           role: user.role,
+          phone: user.phone,
         };
       }
     })
@@ -81,6 +79,7 @@ export const authOptions: NextAuthConfig = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as "USER" | "ADMIN";
+        session.user.phone = token.phone as string | null;
       }
       return session;
     },
@@ -88,6 +87,7 @@ export const authOptions: NextAuthConfig = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.phone = user.phone;
       }
       return token;
     }
@@ -95,6 +95,6 @@ export const authOptions: NextAuthConfig = {
   trustHost: true,
 };
 
-const { auth, handlers } = NextAuth(authOptions);
-export { auth };
+const { auth, handlers, signIn } = NextAuth(authOptions);
+export { auth, signIn };
 export const { GET, POST } = handlers;
