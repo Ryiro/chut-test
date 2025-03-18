@@ -34,6 +34,12 @@ export function BuildProvider({ children }: { children: ReactNode }) {
     COOLER: null,
     PSU: null,
     CASE: null,
+    MONITOR: null,
+    KEYBOARD: null,
+    MOUSE: null,
+    SPEAKERS: null,
+    HEADPHONES: null,
+    EXTERNAL_STORAGE: null
   })
 
   const [isCompatible, setIsCompatible] = useState(true)
@@ -90,6 +96,12 @@ export function BuildProvider({ children }: { children: ReactNode }) {
       COOLER: null,
       PSU: null,
       CASE: null,
+      MONITOR: null,
+      KEYBOARD: null,
+      MOUSE: null,
+      SPEAKERS: null,
+      HEADPHONES: null,
+      EXTERNAL_STORAGE: null
     })
   }
 

@@ -87,6 +87,75 @@ type CoolerSpec = {
   socket: string;
 }
 
+type MonitorSpec = {
+  id: string;
+  size: number;
+  resolution: string;
+  refreshRate: number;
+  panelType: string;
+  responseTime: number;
+  aspectRatio: string;
+  hdrSupport: boolean;
+  ports: string;
+  speakers: boolean;
+  adjustable: boolean;
+}
+
+type KeyboardSpec = {
+  id: string;
+  type: string;
+  layout: string;
+  switchType?: string;
+  backlighting: boolean;
+  wireless: boolean;
+  numpad: boolean;
+  multimedia: boolean;
+}
+
+type MouseSpec = {
+  id: string;
+  dpi: number;
+  buttons: number;
+  wireless: boolean;
+  sensor: string;
+  rgb: boolean;
+  weight?: number;
+  adjustable: boolean;
+}
+
+type SpeakerSpec = {
+  id: string;
+  type: string;
+  totalWattage: number;
+  wireless: boolean;
+  bluetooth: boolean;
+  subwoofer: boolean;
+  remote: boolean;
+}
+
+type HeadphoneSpec = {
+  id: string;
+  type: string;
+  driver: string;
+  wireless: boolean;
+  bluetooth: boolean;
+  noiseCancelling: boolean;
+  microphone: boolean;
+  impedance?: number;
+  frequency: string;
+}
+
+type ExternalStorageSpec = {
+  id: string;
+  capacity: number;
+  type: string;
+  interface: string;
+  portable: boolean;
+  encrypted: boolean;
+  readSpeed?: number;
+  writeSpeed?: number;
+}
+
 type Product = {
   id: string;
   name: string;
@@ -102,6 +171,12 @@ type Product = {
   psuSpec: PsuSpec | null;
   caseSpec: CaseSpec | null;
   coolerSpec: CoolerSpec | null;
+  monitorSpec: MonitorSpec | null;
+  keyboardSpec: KeyboardSpec | null;
+  mouseSpec: MouseSpec | null;
+  speakerSpec: SpeakerSpec | null;
+  headphoneSpec: HeadphoneSpec | null;
+  externalStorageSpec: ExternalStorageSpec | null;
 }
 
 async function getProducts(category?: string) {
@@ -130,6 +205,12 @@ export default function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([])
   const [error, setError] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || 'all')
+  const [formState, setFormState] = useState({
+    portable: false,
+    wireless: false,
+    bluetooth: false,
+    encrypted: false
+  })
 
   useEffect(() => {
     setSelectedCategory(categoryParam || 'all')
@@ -143,6 +224,306 @@ export default function ProductsContent() {
     }
     fetchProducts()
   }, [categoryParam])
+
+  const handleCheckboxChange = (field: keyof typeof formState) => {
+    setFormState(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }))
+  }
+
+  const renderSpecificFilters = () => {
+    switch (selectedCategory) {
+      case 'MONITOR':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Panel Type</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="IPS">IPS</SelectItem>
+                  <SelectItem value="VA">VA</SelectItem>
+                  <SelectItem value="TN">TN</SelectItem>
+                  <SelectItem value="OLED">OLED</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Resolution</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Resolutions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Resolutions</SelectItem>
+                  <SelectItem value="1920x1080">1080p (1920x1080)</SelectItem>
+                  <SelectItem value="2560x1440">1440p (2560x1440)</SelectItem>
+                  <SelectItem value="3840x2160">4K (3840x2160)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Refresh Rate</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Rates" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Rates</SelectItem>
+                  <SelectItem value="60">60Hz</SelectItem>
+                  <SelectItem value="144">144Hz</SelectItem>
+                  <SelectItem value="165">165Hz</SelectItem>
+                  <SelectItem value="240">240Hz</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        );
+
+      case 'KEYBOARD':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="Mechanical">Mechanical</SelectItem>
+                  <SelectItem value="Membrane">Membrane</SelectItem>
+                  <SelectItem value="Optical">Optical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Layout</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Layouts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Layouts</SelectItem>
+                  <SelectItem value="Full-size">Full-size</SelectItem>
+                  <SelectItem value="TKL">TKL</SelectItem>
+                  <SelectItem value="60%">60%</SelectItem>
+                  <SelectItem value="75%">75%</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Features</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Wireless</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Backlighting</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Numpad</span>
+                </label>
+              </div>
+            </div>
+          </>
+        );
+
+      case 'MOUSE':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>DPI Range</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Ranges" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Ranges</SelectItem>
+                  <SelectItem value="8000">Up to 8000</SelectItem>
+                  <SelectItem value="16000">Up to 16000</SelectItem>
+                  <SelectItem value="25000">Up to 25000</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Features</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Wireless</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>RGB Lighting</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Adjustable Weight</span>
+                </label>
+              </div>
+            </div>
+          </>
+        );
+
+      case 'SPEAKERS':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="2.0">2.0</SelectItem>
+                  <SelectItem value="2.1">2.1</SelectItem>
+                  <SelectItem value="5.1">5.1</SelectItem>
+                  <SelectItem value="7.1">7.1</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Features</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Wireless</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Bluetooth</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Subwoofer</span>
+                </label>
+              </div>
+            </div>
+          </>
+        );
+
+      case 'HEADPHONES':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="Over-ear">Over-ear</SelectItem>
+                  <SelectItem value="On-ear">On-ear</SelectItem>
+                  <SelectItem value="In-ear">In-ear</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Features</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Wireless</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Noise Cancelling</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" />
+                  <span>Built-in Microphone</span>
+                </label>
+              </div>
+            </div>
+          </>
+        );
+
+      case 'EXTERNAL_STORAGE':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="SSD">SSD</SelectItem>
+                  <SelectItem value="HDD">HDD</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Capacity</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Capacities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Capacities</SelectItem>
+                  <SelectItem value="500">500GB</SelectItem>
+                  <SelectItem value="1000">1TB</SelectItem>
+                  <SelectItem value="2000">2TB</SelectItem>
+                  <SelectItem value="4000">4TB+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Interface</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="All Interfaces" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Interfaces</SelectItem>
+                  <SelectItem value="USB 3.0">USB 3.0</SelectItem>
+                  <SelectItem value="USB-C">USB-C</SelectItem>
+                  <SelectItem value="Thunderbolt 3">Thunderbolt 3</SelectItem>
+                  <SelectItem value="Thunderbolt 4">Thunderbolt 4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Features</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input 
+                    type="checkbox" 
+                    className="checkbox" 
+                    checked={formState.portable}
+                    onChange={() => handleCheckboxChange('portable')}
+                  />
+                  <span>Portable</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input 
+                    type="checkbox" 
+                    className="checkbox" 
+                    checked={formState.encrypted}
+                    onChange={() => handleCheckboxChange('encrypted')}
+                  />
+                  <span>Hardware Encryption</span>
+                </label>
+              </div>
+            </div>
+          </>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <main className="container mx-auto px-4 py-8 md:px-6">
@@ -171,9 +552,17 @@ export default function ProductsContent() {
                     <SelectItem value="PSU">Power Supplies</SelectItem>
                     <SelectItem value="CASE">Cases</SelectItem>
                     <SelectItem value="COOLER">CPU Coolers</SelectItem>
+                    <SelectItem value="MONITOR">Monitors</SelectItem>
+                    <SelectItem value="KEYBOARD">Keyboards</SelectItem>
+                    <SelectItem value="MOUSE">Mice</SelectItem>
+                    <SelectItem value="SPEAKERS">Speakers</SelectItem>
+                    <SelectItem value="HEADPHONES">Headphones</SelectItem>
+                    <SelectItem value="EXTERNAL_STORAGE">External Storage</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {renderSpecificFilters()}
 
               <div className="space-y-2">
                 <Label>Price Range</Label>
@@ -181,23 +570,6 @@ export default function ProductsContent() {
                   <Input type="number" placeholder="Min" />
                   <Input type="number" placeholder="Max" />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Brand</Label>
-                <Select defaultValue="all">
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Brands" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Brands</SelectItem>
-                    <SelectItem value="intel">Intel</SelectItem>
-                    <SelectItem value="amd">AMD</SelectItem>
-                    <SelectItem value="nvidia">NVIDIA</SelectItem>
-                    <SelectItem value="corsair">Corsair</SelectItem>
-                    <SelectItem value="samsung">Samsung</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="space-y-2">
@@ -222,7 +594,10 @@ export default function ProductsContent() {
         {/* Products Grid */}
         <div className="flex-1">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">PC Components</h1>
+            <h1 className="text-2xl font-bold">
+              {selectedCategory === 'all' ? 'All Products' : 
+                selectedCategory.charAt(0) + selectedCategory.slice(1).toLowerCase().replace('_', ' ') + 's'}
+            </h1>
             <Select defaultValue="price-asc">
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Sort by" />

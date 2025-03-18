@@ -19,6 +19,42 @@ type ProductCardProps = {
     stock: number
     category: ComponentCategory
     image?: string | null
+    monitorSpec?: {
+      size: number
+      resolution: string
+      refreshRate: number
+      panelType: string
+    } | null
+    keyboardSpec?: {
+      type: string
+      layout: string
+      switchType?: string
+      wireless: boolean
+    } | null
+    mouseSpec?: {
+      dpi: number
+      buttons: number
+      wireless: boolean
+      rgb: boolean
+    } | null
+    speakerSpec?: {
+      type: string
+      totalWattage: number
+      wireless: boolean
+      bluetooth: boolean
+    } | null
+    headphoneSpec?: {
+      type: string
+      driver: string
+      wireless: boolean
+      noiseCancelling: boolean
+    } | null
+    externalStorageSpec?: {
+      capacity: number
+      type: string
+      interface: string
+      portable: boolean
+    } | null
   }
 }
 
@@ -66,6 +102,93 @@ export default function ProductCard({ product }: ProductCardProps) {
       window.location.href = '/custom-build'
     }, 300)
   }
+
+  const renderSpecifications = () => {
+    switch (product.category) {
+      // ... existing cases ...
+
+      case 'MONITOR':
+        if (!product.monitorSpec) return null;
+        return (
+          <>
+            <p className="text-sm text-muted-foreground">{product.monitorSpec.size}&quot; {product.monitorSpec.panelType}</p>
+            <p className="text-sm text-muted-foreground">{product.monitorSpec.resolution} @ {product.monitorSpec.refreshRate}Hz</p>
+          </>
+        );
+
+      case 'KEYBOARD':
+        if (!product.keyboardSpec) return null;
+        return (
+          <>
+            <p className="text-sm text-muted-foreground">{product.keyboardSpec.type} - {product.keyboardSpec.layout}</p>
+            {product.keyboardSpec.switchType && (
+              <p className="text-sm text-muted-foreground">Switch: {product.keyboardSpec.switchType}</p>
+            )}
+            {product.keyboardSpec.wireless && (
+              <p className="text-sm text-muted-foreground">Wireless</p>
+            )}
+          </>
+        );
+
+      case 'MOUSE':
+        if (!product.mouseSpec) return null;
+        return (
+          <>
+            <p className="text-sm text-muted-foreground">{product.mouseSpec.dpi} DPI | {product.mouseSpec.buttons} Buttons</p>
+            <p className="text-sm text-muted-foreground">
+              {[
+                product.mouseSpec.wireless ? 'Wireless' : 'Wired',
+                product.mouseSpec.rgb ? 'RGB' : null
+              ].filter(Boolean).join(' • ')}
+            </p>
+          </>
+        );
+
+      case 'SPEAKERS':
+        if (!product.speakerSpec) return null;
+        return (
+          <>
+            <p className="text-sm text-muted-foreground">{product.speakerSpec.type} | {product.speakerSpec.totalWattage}W</p>
+            <p className="text-sm text-muted-foreground">
+              {[
+                product.speakerSpec.wireless ? 'Wireless' : 'Wired',
+                product.speakerSpec.bluetooth ? 'Bluetooth' : null
+              ].filter(Boolean).join(' • ')}
+            </p>
+          </>
+        );
+
+      case 'HEADPHONES':
+        if (!product.headphoneSpec) return null;
+        return (
+          <>
+            <p className="text-sm text-muted-foreground">{product.headphoneSpec.type} | {product.headphoneSpec.driver}</p>
+            <p className="text-sm text-muted-foreground">
+              {[
+                product.headphoneSpec.wireless ? 'Wireless' : 'Wired',
+                product.headphoneSpec.noiseCancelling ? 'ANC' : null
+              ].filter(Boolean).join(' • ')}
+            </p>
+          </>
+        );
+
+      case 'EXTERNAL_STORAGE':
+        if (!product.externalStorageSpec) return null;
+        return (
+          <>
+            <p className="text-sm text-muted-foreground">
+              {product.externalStorageSpec.capacity}GB {product.externalStorageSpec.type}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {product.externalStorageSpec.interface} | {product.externalStorageSpec.portable ? 'Portable' : 'Desktop'}
+            </p>
+          </>
+        );
+
+      default:
+        return null;
+    }
+  }
   
   return (
     <Card className="flex flex-col overflow-hidden">
@@ -103,8 +226,8 @@ export default function ProductCard({ product }: ProductCardProps) {
         {product.description && (
           <p className="text-sm text-muted-foreground mb-3">{product.description}</p>
         )}
-        <p className="text-sm text-muted-foreground mb-2">Category: {product.category}</p>
-        <div className="flex justify-between items-center">
+        {renderSpecifications()}
+        <div className="flex justify-between items-center mt-4">
           <span className="text-lg font-bold">₹{product.price.toLocaleString()}</span>
           <span className={`text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
             {product.stock > 0 ? 'In Stock' : 'Out of Stock'}

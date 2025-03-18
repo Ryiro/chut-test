@@ -85,6 +85,69 @@ interface CoolerSpec extends Spec {
   socket: string;
 }
 
+interface MonitorSpec extends Spec {
+  size: number;
+  resolution: string;
+  refreshRate: number;
+  panelType: string;
+  responseTime: number;
+  aspectRatio: string;
+  hdrSupport: boolean;
+  ports: string;
+  speakers: boolean;
+  heightAdjustable: boolean;
+}
+
+interface KeyboardSpec extends Spec {
+  type: string;
+  layout: string;
+  switchType?: string;
+  backlighting: boolean;
+  wireless: boolean;
+  numpad: boolean;
+  multimedia: boolean;
+}
+
+interface MouseSpec extends Spec {
+  dpi: number;
+  buttons: number;
+  wireless: boolean;
+  sensor: string;
+  rgb: boolean;
+  weight?: number;
+  weightAdjustable: boolean;
+}
+
+interface SpeakerSpec extends Spec {
+  type: string;
+  totalWattage: number;
+  wireless: boolean;
+  bluetooth: boolean;
+  subwoofer: boolean;
+  remote: boolean;
+}
+
+interface HeadphoneSpec extends Spec {
+  type: string;
+  driver: string;
+  wireless: boolean;
+  bluetooth: boolean;
+  noiseCancelling: boolean;
+  microphone: boolean;
+  impedance?: number;
+  frequency: string;
+}
+
+interface ExternalStorageSpec extends Spec {
+  capacity: number;
+  type: string;
+  interface: string;
+  portable: boolean;
+  encrypted: boolean;
+  readSpeed?: number;
+  writeSpeed?: number;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -101,6 +164,12 @@ interface Product {
   psuSpec?: PsuSpec;
   caseSpec?: CaseSpec;
   coolerSpec?: CoolerSpec;
+  monitorSpec?: MonitorSpec;
+  keyboardSpec?: KeyboardSpec;
+  mouseSpec?: MouseSpec;
+  speakerSpec?: SpeakerSpec;
+  headphoneSpec?: HeadphoneSpec;
+  externalStorageSpec?: ExternalStorageSpec;
   updatedAt: string;
   createdAt: string;
 }
@@ -114,7 +183,115 @@ const ComponentTypes = {
   PSU: 'PSU',
   CASE: 'CASE',
   COOLER: 'COOLER',
+  MONITOR: 'MONITOR',
+  KEYBOARD: 'KEYBOARD',
+  MOUSE: 'MOUSE',
+  SPEAKERS: 'SPEAKERS',
+  HEADPHONES: 'HEADPHONES',
+  EXTERNAL_STORAGE: 'EXTERNAL_STORAGE',
 } as const;
+
+interface FormData {
+  name: string;
+  description: string;
+  price: string;
+  stock: string;
+  category: keyof typeof ComponentTypes;
+  image?: string;
+  specs: {
+    // CPU Specs
+    brand?: string;
+    cores?: string;
+    threads?: string;
+    baseSpeed?: string;
+    boostSpeed?: string;
+    socket?: string;
+    tdp?: string;
+
+    // GPU Specs
+    memory?: string;
+    memoryType?: string;
+    coreClock?: string;
+    boostClock?: string;
+
+    // RAM Specs
+    capacity?: string;
+    speed?: string;
+    type?: string;
+    timing?: string;
+
+    // Storage Specs
+    interface?: string;
+    readSpeed?: string;
+    writeSpeed?: string;
+
+    // Motherboard Specs
+    chipset?: string;
+    formFactor?: string;
+    memoryMax?: string;
+    memorySlots?: string;
+
+    // PSU Specs
+    wattage?: string;
+    efficiency?: string;
+    modular?: boolean;
+
+    // Case Specs
+    maxGpuLength?: string;
+    maxCpuHeight?: string;
+
+    // Cooler Specs
+    height?: string;
+    radiatorSize?: string;
+    fanSize?: string;
+    fanCount?: string;
+
+    // Monitor Specs
+    size?: string;
+    resolution?: string;
+    refreshRate?: string;
+    panelType?: string;
+    responseTime?: string;
+    aspectRatio?: string;
+    ports?: string;
+    hdrSupport?: boolean;
+    speakers?: boolean;
+    heightAdjustable?: boolean;
+
+    // Keyboard Specs
+    layout?: string;
+    switchType?: string;
+    backlighting?: boolean;
+    wireless?: boolean;
+    numpad?: boolean;
+    multimedia?: boolean;
+
+    // Mouse Specs
+    dpi?: string;
+    buttons?: string;
+    sensor?: string;
+    rgb?: boolean;
+    weight?: string;
+    weightAdjustable?: boolean;
+
+    // Speaker Specs
+    totalWattage?: string;
+    bluetooth?: boolean;
+    subwoofer?: boolean;
+    remote?: boolean;
+
+    // Headphone Specs
+    driver?: string;
+    noiseCancelling?: boolean;
+    microphone?: boolean;
+    impedance?: string;
+    frequency?: string;
+
+    // External Storage Specs
+    portable?: boolean;
+    encrypted?: boolean;
+  };
+}
 
 export default function AdminPage() {
   const [category, setCategory] = useState<keyof typeof ComponentTypes>('CPU');
@@ -122,11 +299,12 @@ export default function AdminPage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     description: '', // Add description field
     price: '',
     stock: '',
+    category: 'CPU',
     image: '',
     specs: {
       brand: '',
@@ -160,6 +338,39 @@ export default function AdminPage() {
       fanCount: '',
       radiatorSize: '',
       fanSize: '',
+      size: '',
+      resolution: '',
+      refreshRate: '',
+      panelType: '',
+      responseTime: '',
+      aspectRatio: '',
+      ports: '',
+      hdrSupport: false,
+      speakers: false,
+      heightAdjustable: false,
+      layout: '',
+      switchType: '',
+      backlighting: false,
+      wireless: false,
+      numpad: false,
+      multimedia: false,
+      dpi: '',
+      buttons: '',
+      sensor: '',
+      rgb: false,
+      weight: '',
+      weightAdjustable: false,
+      totalWattage: '',
+      bluetooth: false,
+      subwoofer: false,
+      remote: false,
+      driver: '',
+      noiseCancelling: false,
+      microphone: false,
+      impedance: '',
+      frequency: '',
+      portable: false,
+      encrypted: false
     }
   });
 
@@ -309,6 +520,7 @@ export default function AdminPage() {
           description: '',
           price: '',
           stock: '',
+          category: 'CPU',
           image: '',
           specs: { ...formData.specs }
         });
@@ -490,10 +702,12 @@ export default function AdminPage() {
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
-                {(formData.specs.socket === '' || (!socketOptions.Intel.includes(formData.specs.socket) && !socketOptions.AMD.includes(formData.specs.socket))) && (
+                {formData.specs.socket && (formData.specs.socket === '' || 
+                  (!socketOptions.Intel.includes(formData.specs.socket || '') && 
+                   !socketOptions.AMD.includes(formData.specs.socket || ''))) && (
                   <Input
                     type="text"
-                    value={formData.specs.socket}
+                    value={formData.specs.socket || ''}
                     onChange={(e) => setFormData({
                       ...formData,
                       specs: { ...formData.specs, socket: e.target.value }
@@ -948,6 +1162,630 @@ export default function AdminPage() {
             </div>
           </div>
         );
+      case 'MONITOR':
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Size (inches)</Label>
+              <Input
+                type="number"
+                step="0.1"
+                value={formData.specs.size}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, size: e.target.value }
+                })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Resolution</Label>
+              <Input
+                type="text"
+                value={formData.specs.resolution}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, resolution: e.target.value }
+                })}
+                placeholder="e.g., 1920x1080"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Refresh Rate (Hz)</Label>
+              <Input
+                type="number"
+                value={formData.specs.refreshRate}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, refreshRate: e.target.value }
+                })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Panel Type</Label>
+              <Select
+                value={formData.specs.panelType}
+                onValueChange={(value) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, panelType: value }
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select panel type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="IPS">IPS</SelectItem>
+                  <SelectItem value="VA">VA</SelectItem>
+                  <SelectItem value="TN">TN</SelectItem>
+                  <SelectItem value="OLED">OLED</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Response Time (ms)</Label>
+              <Input
+                type="number"
+                step="0.1"
+                value={formData.specs.responseTime}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, responseTime: e.target.value }
+                })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Aspect Ratio</Label>
+              <Input
+                type="text"
+                value={formData.specs.aspectRatio}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, aspectRatio: e.target.value }
+                })}
+                placeholder="e.g., 16:9"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Ports</Label>
+              <Input
+                type="text"
+                value={formData.specs.ports}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, ports: e.target.value }
+                })}
+                placeholder="HDMI, DisplayPort, etc."
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.hdrSupport}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, hdrSupport: e.target.checked }
+                })}
+              />
+              <label>HDR Support</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.speakers}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, speakers: e.target.checked }
+                })}
+              />
+              <label>Built-in Speakers</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.heightAdjustable}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, heightAdjustable: e.target.checked }
+                })}
+              />
+              <label>Height/Tilt Adjustable</label>
+            </div>
+          </div>
+        );
+
+      case 'KEYBOARD':
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select
+                value={formData.specs.type}
+                onValueChange={(value) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, type: value }
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select keyboard type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Mechanical">Mechanical</SelectItem>
+                  <SelectItem value="Membrane">Membrane</SelectItem>
+                  <SelectItem value="Optical">Optical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Layout</Label>
+              <Select
+                value={formData.specs.layout}
+                onValueChange={(value) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, layout: value }
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select layout" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Full-size">Full-size</SelectItem>
+                  <SelectItem value="TKL">TKL</SelectItem>
+                  <SelectItem value="60%">60%</SelectItem>
+                  <SelectItem value="75%">75%</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {formData.specs.type === 'Mechanical' && (
+              <div className="space-y-2">
+                <Label>Switch Type</Label>
+                <Input
+                  type="text"
+                  value={formData.specs.switchType}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    specs: { ...formData.specs, switchType: e.target.value }
+                  })}
+                  placeholder="e.g., Cherry MX Red"
+                />
+              </div>
+            )}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.backlighting}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, backlighting: e.target.checked }
+                })}
+              />
+              <label>Backlighting</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.wireless}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, wireless: e.target.checked }
+                })}
+              />
+              <label>Wireless</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.numpad}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, numpad: e.target.checked }
+                })}
+              />
+              <label>Numpad</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.multimedia}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, multimedia: e.target.checked }
+                })}
+              />
+              <label>Multimedia Keys</label>
+            </div>
+          </div>
+        );
+
+      case 'MOUSE':
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>DPI</Label>
+              <Input
+                type="number"
+                value={formData.specs.dpi}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, dpi: e.target.value }
+                })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Number of Buttons</Label>
+              <Input
+                type="number"
+                value={formData.specs.buttons}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, buttons: e.target.value }
+                })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Sensor Type</Label>
+              <Input
+                type="text"
+                value={formData.specs.sensor}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, sensor: e.target.value }
+                })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Weight (g)</Label>
+              <Input
+                type="number"
+                value={formData.specs.weight}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, weight: e.target.value }
+                })}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.wireless}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, wireless: e.target.checked }
+                })}
+              />
+              <label>Wireless</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.rgb}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, rgb: e.target.checked }
+                })}
+              />
+              <label>RGB Lighting</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.weightAdjustable}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, weightAdjustable: e.target.checked }
+                })}
+              />
+              <label>Adjustable Weight</label>
+            </div>
+          </div>
+        );
+
+      case 'SPEAKERS':
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select
+                value={formData.specs.type}
+                onValueChange={(value) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, type: value }
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select speaker type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2.0">2.0</SelectItem>
+                  <SelectItem value="2.1">2.1</SelectItem>
+                  <SelectItem value="5.1">5.1</SelectItem>
+                  <SelectItem value="7.1">7.1</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Total Wattage</Label>
+              <Input
+                type="number"
+                value={formData.specs.totalWattage}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, totalWattage: e.target.value }
+                })}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.wireless}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, wireless: e.target.checked }
+                })}
+              />
+              <label>Wireless</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.bluetooth}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, bluetooth: e.target.checked }
+                })}
+              />
+              <label>Bluetooth</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.subwoofer}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, subwoofer: e.target.checked }
+                })}
+              />
+              <label>Subwoofer</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.remote}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, remote: e.target.checked }
+                })}
+              />
+              <label>Remote Control</label>
+            </div>
+          </div>
+        );
+
+      case 'HEADPHONES':
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select
+                value={formData.specs.type}
+                onValueChange={(value) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, type: value }
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select headphone type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Over-ear">Over-ear</SelectItem>
+                  <SelectItem value="On-ear">On-ear</SelectItem>
+                  <SelectItem value="In-ear">In-ear</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Driver</Label>
+              <Input
+                type="text"
+                value={formData.specs.driver}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, driver: e.target.value }
+                })}
+                placeholder="e.g., 40mm Dynamic"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Frequency Response</Label>
+              <Input
+                type="text"
+                value={formData.specs.frequency}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, frequency: e.target.value }
+                })}
+                placeholder="e.g., 20Hz-20kHz"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Impedance (Ω)</Label>
+              <Input
+                type="number"
+                value={formData.specs.impedance}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, impedance: e.target.value }
+                })}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.wireless}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, wireless: e.target.checked }
+                })}
+              />
+              <label>Wireless</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.bluetooth}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, bluetooth: e.target.checked }
+                })}
+              />
+              <label>Bluetooth</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.noiseCancelling}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, noiseCancelling: e.target.checked }
+                })}
+              />
+              <label>Active Noise Cancellation</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.microphone}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, microphone: e.target.checked }
+                })}
+              />
+              <label>Built-in Microphone</label>
+            </div>
+          </div>
+        );
+
+      case 'EXTERNAL_STORAGE':
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select
+                value={formData.specs.type}
+                onValueChange={(value) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, type: value }
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select storage type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SSD">SSD</SelectItem>
+                  <SelectItem value="HDD">HDD</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Capacity (GB)</Label>
+              <Input
+                type="number"
+                value={formData.specs.capacity}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, capacity: e.target.value }
+                })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Interface</Label>
+              <Select
+                value={formData.specs.interface}
+                onValueChange={(value) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, interface: value }
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select interface" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USB 3.0">USB 3.0</SelectItem>
+                  <SelectItem value="USB-C">USB-C</SelectItem>
+                  <SelectItem value="Thunderbolt 3">Thunderbolt 3</SelectItem>
+                  <SelectItem value="Thunderbolt 4">Thunderbolt 4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {formData.specs.type === 'SSD' && (
+              <>
+                <div className="space-y-2">
+                  <Label>Read Speed (MB/s)</Label>
+                  <Input
+                    type="number"
+                    value={formData.specs.readSpeed}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      specs: { ...formData.specs, readSpeed: e.target.value }
+                    })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Write Speed (MB/s)</Label>
+                  <Input
+                    type="number"
+                    value={formData.specs.writeSpeed}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      specs: { ...formData.specs, writeSpeed: e.target.value }
+                    })}
+                  />
+                </div>
+              </>
+            )}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.portable}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, portable: e.target.checked }
+                })}
+              />
+              <label>Portable</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={formData.specs.encrypted}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  specs: { ...formData.specs, encrypted: e.target.checked }
+                })}
+              />
+              <label>Hardware Encryption</label>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }

@@ -19,6 +19,12 @@ enum ComponentCategory {
   COOLER
   PSU
   CASE
+  MONITOR
+  KEYBOARD
+  MOUSE
+  SPEAKERS
+  HEADPHONES
+  EXTERNAL_STORAGE
 }
 
 // NextAuth models
@@ -92,6 +98,12 @@ model Product {
   psuSpec   PsuSpec?         @relation(fields: [psuSpecId], references: [id])
   caseSpec  CaseSpec?        @relation(fields: [caseSpecId], references: [id])
   coolerSpec CoolerSpec?     @relation(fields: [coolerSpecId], references: [id])
+  monitorSpec MonitorSpec?   @relation(fields: [monitorSpecId], references: [id])
+  keyboardSpec KeyboardSpec? @relation(fields: [keyboardSpecId], references: [id])
+  mouseSpec MouseSpec?       @relation(fields: [mouseSpecId], references: [id])
+  speakerSpec SpeakerSpec?   @relation(fields: [speakerSpecId], references: [id])
+  headphoneSpec HeadphoneSpec? @relation(fields: [headphoneSpecId], references: [id])
+  externalStorageSpec ExternalStorageSpec? @relation(fields: [externalStorageSpecId], references: [id])
   cpuSpecId String?
   gpuSpecId String?
   ramSpecId String?
@@ -100,6 +112,12 @@ model Product {
   psuSpecId String?
   caseSpecId String?
   coolerSpecId String?
+  monitorSpecId String?
+  keyboardSpecId String?
+  mouseSpecId String?
+  speakerSpecId String?
+  headphoneSpecId String?
+  externalStorageSpecId String?
   updatedAt DateTime         @updatedAt
   createdAt DateTime         @default(now())
 }
@@ -182,4 +200,79 @@ model CoolerSpec {
   tdp           Int       // Maximum TDP support in watts
   socket        String    // Supported CPU sockets
   products     Product[]
+}
+
+model MonitorSpec {
+  id            String    @id @default(cuid())
+  size          Float     // Display size in inches
+  resolution    String    // e.g., "1920x1080"
+  refreshRate   Int       // in Hz
+  panelType     String    // e.g., IPS, VA, TN
+  responseTime  Float     // in ms
+  aspectRatio   String    // e.g., "16:9"
+  hdrSupport    Boolean   // Whether monitor supports HDR
+  ports         String    // JSON string of available ports
+  speakers      Boolean   // Built-in speakers
+  adjustable    Boolean   // Height/tilt adjustable
+  products      Product[]
+}
+
+model KeyboardSpec {
+  id            String    @id @default(cuid())
+  type          String    // Mechanical, Membrane, etc.
+  layout        String    // Full-size, TKL, 60%, etc.
+  switchType    String?   // For mechanical keyboards
+  backlighting  Boolean   // Whether keyboard has backlighting
+  wireless      Boolean   // Wireless connectivity
+  numpad        Boolean   // Has numpad
+  multimedia    Boolean   // Has multimedia keys
+  products      Product[]
+}
+
+model MouseSpec {
+  id            String    @id @default(cuid())
+  dpi           Int       // Maximum DPI
+  buttons       Int       // Number of buttons
+  wireless      Boolean   // Wireless connectivity
+  sensor        String    // Sensor type
+  rgb          Boolean   // RGB lighting
+  weight        Int?      // Weight in grams
+  adjustable    Boolean   // Adjustable weight
+  products      Product[]
+}
+
+model SpeakerSpec {
+  id            String    @id @default(cuid())
+  type          String    // 2.0, 2.1, 5.1, etc.
+  totalWattage  Int       // Total power output
+  wireless      Boolean   // Wireless connectivity
+  bluetooth     Boolean   // Bluetooth support
+  subwoofer     Boolean   // Includes subwoofer
+  remote        Boolean   // Includes remote control
+  products      Product[]
+}
+
+model HeadphoneSpec {
+  id            String    @id @default(cuid())
+  type          String    // Over-ear, In-ear, On-ear
+  driver        String    // Driver specifications
+  wireless      Boolean   // Wireless connectivity
+  bluetooth     Boolean   // Bluetooth support
+  noiseCancelling Boolean // Active noise cancellation
+  microphone    Boolean   // Has microphone
+  impedance     Int?      // Impedance in ohms
+  frequency     String    // Frequency response range
+  products      Product[]
+}
+
+model ExternalStorageSpec {
+  id            String    @id @default(cuid())
+  capacity      Int       // Storage capacity in GB
+  type          String    // HDD or SSD
+  interface     String    // USB 3.0, USB-C, etc.
+  portable      Boolean   // Portable or Desktop
+  encrypted     Boolean   // Hardware encryption support
+  readSpeed     Int?      // Read speed in MB/s
+  writeSpeed    Int?      // Write speed in MB/s
+  products      Product[]
 }

@@ -82,6 +82,56 @@ export async function GET(request: Request) {
                 ]
               }
             },
+            // New peripheral specs search
+            {
+              monitorSpec: {
+                OR: [
+                  { resolution: { contains: searchQuery } },
+                  { panelType: { contains: searchQuery } },
+                  { aspectRatio: { contains: searchQuery } }
+                ]
+              }
+            },
+            {
+              keyboardSpec: {
+                OR: [
+                  { type: { contains: searchQuery } },
+                  { layout: { contains: searchQuery } },
+                  { switchType: { contains: searchQuery } }
+                ]
+              }
+            },
+            {
+              mouseSpec: {
+                OR: [
+                  { sensor: { contains: searchQuery } }
+                ]
+              }
+            },
+            {
+              speakerSpec: {
+                OR: [
+                  { type: { contains: searchQuery } }
+                ]
+              }
+            },
+            {
+              headphoneSpec: {
+                OR: [
+                  { type: { contains: searchQuery } },
+                  { driver: { contains: searchQuery } },
+                  { frequency: { contains: searchQuery } }
+                ]
+              }
+            },
+            {
+              externalStorageSpec: {
+                OR: [
+                  { type: { contains: searchQuery } },
+                  { interface: { contains: searchQuery } }
+                ]
+              }
+            }
           ],
         },
         select: {
@@ -101,6 +151,12 @@ export async function GET(request: Request) {
           psuSpec: true,
           caseSpec: true,
           coolerSpec: true,
+          monitorSpec: true,
+          keyboardSpec: true,
+          mouseSpec: true,
+          speakerSpec: true,
+          headphoneSpec: true,
+          externalStorageSpec: true
         },
         orderBy: {
           createdAt: 'desc'
