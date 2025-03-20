@@ -1,275 +1,489 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export default function Profile() {
-  const { data: session, status, update } = useSession();
+interface Address {
+  id: string;
+  type: string;
+  name: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone: string;
+  isDefault: boolean;
+}
+
+interface AddressFormData {
+  type: string;
+  name: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone: string;
+}
+
+export default function ProfilePage() {
+  const { data: session, update } = useSession();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [userData, setUserData] = useState({
-    name: "",
-    email: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+
+  const [formData, setFormData] = useState<AddressFormData>({
+    type: 'SHIPPING',
+    name: '',
+    line1: '',
+    line2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'India',
+    phone: ''
   });
 
-  // Redirect if not logged in
+  const [profileData, setProfileData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/profile");
-    } else if (session?.user) {
-      setUserData(prevData => ({
-        ...prevData,
-        name: session.user.name || "",
-        email: session.user.email || "",
+    const fetchAddresses = async () => {
+      try {
+        const response = await fetch('/api/user/addresses');
+        if (!response.ok) throw new Error('Failed to fetch addresses');
+        const data = await response.json();
+        setAddresses(data);
+      } catch (error) {
+        console.error('Error fetching addresses:', error);
+        toast.error('Failed to load addresses');
+      } 
+    };
+
+    if (session?.user) {
+      setProfileData(prev => ({
+        ...prev,
+        name: session.user.name || '',
+        email: session.user.email || '',
+        phone: session.user.phone || ''
       }));
+      fetchAddresses();
     }
-  }, [session, status, router]);
+  }, [session?.user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setUserData({ ...userData, [name]: value });
-  };
-
-  const handleProfileUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/auth/update-profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: userData.name,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update profile");
-      }
-
-      const updatedUser = await response.json();
-      
-      // Update the session with the new user data
-      await update({
-        ...session,
-        user: {
-          ...session?.user,
-          name: updatedUser.name,
-        },
-      });
-
-      toast.success("Profile updated successfully!");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    // Validate passwords
-    if (userData.newPassword !== userData.confirmPassword) {
-      toast.error("New passwords don't match");
-      setIsLoading(false);
-      return;
-    }
-
-    if (userData.newPassword.length < 8) {
-      toast.error("Password must be at least 8 characters long");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/auth/change-password", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          currentPassword: userData.currentPassword,
-          newPassword: userData.newPassword,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to change password");
-      }
-
-      // Reset password fields
-      setUserData({
-        ...userData,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-
-      toast.success("Password changed successfully!");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-lg">Loading...</p>
-      </div>
-    );
+  if (!session) {
+    router.push('/login?callbackUrl=/profile');
+    return null;
   }
 
+  const handleProfileUpdate = async () => {
+    try {
+      const response = await fetch('/api/auth/update-profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: profileData.name,
+          email: profileData.email,
+          phone: profileData.phone
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to update profile');
+      
+      await update();
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (profileData.newPassword !== profileData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: profileData.currentPassword,
+          newPassword: profileData.newPassword
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to change password');
+
+      setProfileData(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }));
+      toast.success('Password changed successfully');
+    } catch (error) {
+      console.error('Error changing password:', error);
+      toast.error('Failed to change password');
+    }
+  };
+
+  const handleAddressSubmit = async () => {
+    try {
+      const response = await fetch('/api/user/addresses', {
+        method: editingAddress ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingAddress ? { ...formData, id: editingAddress.id } : formData)
+      });
+
+      if (!response.ok) throw new Error('Failed to save address');
+
+      const savedAddress = await response.json();
+      
+      if (editingAddress) {
+        setAddresses(addresses.map(addr => 
+          addr.id === editingAddress.id ? savedAddress : addr
+        ));
+      } else {
+        setAddresses([...addresses, savedAddress]);
+      }
+
+      setShowAddressForm(false);
+      setEditingAddress(null);
+      setFormData({
+        type: 'SHIPPING',
+        name: '',
+        line1: '',
+        line2: '',
+        city: '',
+        state: '',
+        postalCode: '',
+        country: 'India',
+        phone: ''
+      });
+      toast.success(`Address ${editingAddress ? 'updated' : 'added'} successfully`);
+    } catch (error) {
+      console.error('Error saving address:', error);
+      toast.error('Failed to save address');
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: string) => {
+    if (!window.confirm('Are you sure you want to delete this address?')) return;
+
+    try {
+      const response = await fetch(`/api/user/addresses?id=${addressId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) throw new Error('Failed to delete address');
+
+      setAddresses(addresses.filter(addr => addr.id !== addressId));
+      toast.success('Address deleted successfully');
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      toast.error('Failed to delete address');
+    }
+  };
+
+  const handleSetDefaultAddress = async (addressId: string) => {
+    try {
+      const response = await fetch('/api/user/addresses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: addressId,
+          isDefault: true
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to set default address');
+
+      setAddresses(addresses.map(addr => ({
+        ...addr,
+        isDefault: addr.id === addressId
+      })));
+      toast.success('Default address updated');
+    } catch (error) {
+      console.error('Error setting default address:', error);
+      toast.error('Failed to set default address');
+    }
+  };
+
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
-      <h1 className="text-3xl font-bold mb-8">Your Profile</h1>
+    <>
+      <Header />
+      <main className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-2xl font-bold mb-8">My Profile</h1>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="p-6 space-y-6">
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-            <div className="relative h-24 w-24 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-              {session?.user?.image ? (
-                <Image
-                  src={session.user.image}
-                  alt="Profile"
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-12 w-12"
-                  >
-                    <circle cx="12" cy="8" r="5" />
-                    <path d="M20 21a8 8 0 0 0-16 0" />
-                  </svg>
+          <Tabs defaultValue="profile">
+            <TabsList>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="addresses">Addresses</TabsTrigger>
+              <TabsTrigger value="password">Password</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="profile">
+              <Card className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label>Name</Label>
+                    <Input
+                      value={profileData.name}
+                      onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Email</Label>
+                    <Input
+                      type="email"
+                      value={profileData.email}
+                      onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Phone</Label>
+                    <Input
+                      value={profileData.phone}
+                      onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                    />
+                  </div>
+                  <Button onClick={handleProfileUpdate}>Save Changes</Button>
                 </div>
-              )}
-            </div>
-            <div className="flex-1 space-y-1 text-center sm:text-left">
-              <h2 className="text-2xl font-semibold">{session?.user?.name}</h2>
-              <p className="text-gray-500 dark:text-gray-400">
-                {session?.user?.email}
-              </p>
-              <p className="text-sm font-medium">
-                Role: {session?.user?.role === "ADMIN" ? "Administrator" : "User"}
-              </p>
-            </div>
-          </div>
+              </Card>
+            </TabsContent>
 
-          <form onSubmit={handleProfileUpdate} className="space-y-4">
-            <h3 className="text-lg font-medium">Basic Information</h3>
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                value={userData.name}
-                onChange={handleChange}
-                disabled={isLoading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                value={userData.email}
-                disabled={true}
-                className="bg-gray-50 dark:bg-gray-800"
-              />
-              <p className="text-sm text-gray-500">
-                Email cannot be changed
-              </p>
-            </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Updating..." : "Update Profile"}
-            </Button>
-          </form>
-        </Card>
+            <TabsContent value="addresses">
+              <Card className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold">My Addresses</h2>
+                  <Button onClick={() => {
+                    setEditingAddress(null);
+                    setShowAddressForm(true);
+                  }}>
+                    Add New Address
+                  </Button>
+                </div>
 
-        <Card className="p-6 space-y-6">
-          <form onSubmit={handlePasswordChange} className="space-y-4">
-            <h3 className="text-lg font-medium">Change Password</h3>
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <Input
-                id="currentPassword"
-                name="currentPassword"
-                type="password"
-                value={userData.currentPassword}
-                onChange={handleChange}
-                disabled={isLoading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input
-                id="newPassword"
-                name="newPassword"
-                type="password"
-                value={userData.newPassword}
-                onChange={handleChange}
-                disabled={isLoading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={userData.confirmPassword}
-                onChange={handleChange}
-                disabled={isLoading}
-              />
-            </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Changing..." : "Change Password"}
-            </Button>
-          </form>
+                {showAddressForm ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Address Type</Label>
+                        <select
+                          className="w-full p-2 border rounded"
+                          value={formData.type}
+                          onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                        >
+                          <option value="SHIPPING">Shipping</option>
+                          <option value="BILLING">Billing</option>
+                          <option value="BOTH">Both</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label>Full Name</Label>
+                        <Input
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Address Line 1</Label>
+                      <Input
+                        value={formData.line1}
+                        onChange={(e) => setFormData({ ...formData, line1: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Address Line 2 (Optional)</Label>
+                      <Input
+                        value={formData.line2}
+                        onChange={(e) => setFormData({ ...formData, line2: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>City</Label>
+                        <Input
+                          value={formData.city}
+                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>State</Label>
+                        <Input
+                          value={formData.state}
+                          onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Postal Code</Label>
+                        <Input
+                          value={formData.postalCode}
+                          onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>Country</Label>
+                        <Input
+                          value={formData.country}
+                          onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Phone Number</Label>
+                      <Input
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      />
+                    </div>
+                    <div className="flex gap-4">
+                      <Button onClick={handleAddressSubmit}>
+                        {editingAddress ? 'Update Address' : 'Add Address'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowAddressForm(false);
+                          setEditingAddress(null);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {addresses.length === 0 ? (
+                      <p>No addresses added yet.</p>
+                    ) : (
+                      addresses.map(address => (
+                        <Card key={address.id} className="p-4">
+                          <div className="flex justify-between">
+                            <div>
+                              <p className="font-medium">{address.name}</p>
+                              <p className="text-sm text-gray-500">{address.type}</p>
+                              <p className="mt-1">
+                                {address.line1}<br />
+                                {address.line2 && <>{address.line2}<br /></>}
+                                {address.city}, {address.state} {address.postalCode}<br />
+                                {address.country}<br />
+                                Phone: {address.phone}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              {!address.isDefault && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleSetDefaultAddress(address.id)}
+                                >
+                                  Set as Default
+                                </Button>
+                              )}
+                              {address.isDefault && (
+                                <p className="text-green-600 text-sm">Default Address</p>
+                              )}
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingAddress(address);
+                                    setFormData({
+                                      type: address.type,
+                                      name: address.name,
+                                      line1: address.line1,
+                                      line2: address.line2 || '',
+                                      city: address.city,
+                                      state: address.state,
+                                      postalCode: address.postalCode,
+                                      country: address.country,
+                                      phone: address.phone
+                                    });
+                                    setShowAddressForm(true);
+                                  }}
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleDeleteAddress(address.id)}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      ))
+                    )}
+                  </div>
+                )}
+              </Card>
+            </TabsContent>
 
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-4">Danger Zone</h3>
-            <Button
-              variant="destructive"
-              className="w-full"
-              type="button"
-              disabled={isLoading}
-              onClick={() => toast.error("This feature is coming soon.")}
-            >
-              Delete Account
-            </Button>
-          </div>
-        </Card>
-      </div>
-    </div>
+            <TabsContent value="password">
+              <Card className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label>Current Password</Label>
+                    <Input
+                      type="password"
+                      value={profileData.currentPassword}
+                      onChange={(e) => setProfileData({ ...profileData, currentPassword: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>New Password</Label>
+                    <Input
+                      type="password"
+                      value={profileData.newPassword}
+                      onChange={(e) => setProfileData({ ...profileData, newPassword: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Confirm New Password</Label>
+                    <Input
+                      type="password"
+                      value={profileData.confirmPassword}
+                      onChange={(e) => setProfileData({ ...profileData, confirmPassword: e.target.value })}
+                    />
+                  </div>
+                  <Button onClick={handlePasswordChange}>Change Password</Button>
+                </div>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 }

@@ -1,47 +1,47 @@
-import { NextResponse } from 'next/server';
-import crypto from 'crypto';
+import { db } from "@/lib/db";
+import { NextResponse } from "next/server";
+import crypto from "crypto";
+import { auth } from "@/lib/auth";
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const { orderId, paymentId, signature } = await request.json();
+    const session = await auth();
+    if (!session?.user) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
 
-    // Get the secret key from environment variable
-    const secret = process.env.RAZORPAY_KEY_SECRET!;
+    const { orderId, paymentId, signature } = await req.json();
 
-    // Create the verification string
-    const text = `${orderId}|${paymentId}`;
-    
-    // Generate the expected signature
+    // Verify the payment signature
+    const body = orderId + "|" + paymentId;
     const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(text)
-      .digest('hex');
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+      .update(body.toString())
+      .digest("hex");
 
-    // Verify the signature
-    const isValid = expectedSignature === signature;
-
-    if (!isValid) {
-      return NextResponse.json(
-        { error: 'Invalid payment signature' },
+    if (expectedSignature !== signature) {
+      return new NextResponse(
+        JSON.stringify({ error: "Invalid payment signature" }),
         { status: 400 }
       );
     }
 
-    // Here you would typically:
-    // 1. Update your database to mark the order as paid
-    // 2. Send confirmation emails
-    // 3. Update inventory
-    // 4. etc.
-
-    return NextResponse.json({
-      message: 'Payment verified successfully',
-      paymentId,
-      orderId
+    // Update order status
+    const order = await db.order.update({
+      where: { id: orderId },
+      data: {
+        status: "PROCESSING",
+        paymentStatus: "PAID",
+        paymentId,
+        paymentSignature: signature
+      }
     });
+
+    return NextResponse.json({ success: true, order });
   } catch (error) {
-    console.error('Payment verification failed:', error);
-    return NextResponse.json(
-      { error: 'Failed to verify payment' },
+    console.error("Error verifying payment:", error);
+    return new NextResponse(
+      JSON.stringify({ error: "Failed to verify payment" }),
       { status: 500 }
     );
   }

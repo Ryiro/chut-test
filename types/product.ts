@@ -1,0 +1,32 @@
+export type ComponentCategory = 
+  | "CPU" 
+  | "GPU" 
+  | "RAM" 
+  | "STORAGE" 
+  | "MOTHERBOARD" 
+  | "PSU" 
+  | "CASE" 
+  | "COOLER" 
+  | "MONITOR" 
+  | "KEYBOARD" 
+  | "MOUSE" 
+  | "SPEAKERS" 
+  | "HEADPHONES" 
+  | "EXTERNAL_STORAGE";
+
+export const COMPONENT_CATEGORIES = {
+  CPU: "CPU",
+  GPU: "GPU",
+  RAM: "RAM",
+  STORAGE: "STORAGE",
+  MOTHERBOARD: "MOTHERBOARD",
+  PSU: "PSU",
+  CASE: "CASE",
+  COOLER: "COOLER",
+  MONITOR: "MONITOR",
+  KEYBOARD: "KEYBOARD",
+  MOUSE: "MOUSE",
+  SPEAKERS: "SPEAKERS",
+  HEADPHONES: "HEADPHONES",
+  EXTERNAL_STORAGE: "EXTERNAL_STORAGE"
+} as const;

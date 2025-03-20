@@ -1,14 +1,15 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react'
 
 export type CartItem = {
-  id: string
+  id: string          // We'll use this as productId for consistency
   name: string
   price: number
   image?: string
   quantity: number
   category: string
+  productId?: string  // Add this for backward compatibility
 }
 
 type CartContextType = {
@@ -25,7 +26,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
-  
+
   // Load items from localStorage on mount (client-side only)
   useEffect(() => {
     try {
@@ -89,7 +90,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const itemCount = items.reduce((total, item) => total + item.quantity, 0)
   
-  const subtotal = items.reduce((total, item) => total + (item.price * item.quantity), 0)
+  const subtotal = useMemo(() => 
+    items.reduce((total, item) => total + (item.price * item.quantity), 0)
+  , [items])
 
   return (
     <CartContext.Provider value={{

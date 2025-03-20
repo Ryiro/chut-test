@@ -1,48 +1,26 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-enum ComponentCategory {
-  CPU
-  GPU
-  MOTHERBOARD
-  RAM
-  STORAGE
-  COOLER
-  PSU
-  CASE
-  MONITOR
-  KEYBOARD
-  MOUSE
-  SPEAKERS
-  HEADPHONES
-  EXTERNAL_STORAGE
-}
-
-// NextAuth models
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? // @db.Text for MySQL and PostgreSQL
-  access_token      String? // @db.Text for MySQL and PostgreSQL
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? // @db.Text for MySQL and PostgreSQL
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -55,16 +33,24 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  password      String?   // Hashed password for credentials provider
-  phone         String?   @unique  // Added for WhatsApp authentication
+  password      String?
+  phone         String?   @unique
   role          UserRole  @default(USER)
   accounts      Account[]
+  addresses     Address[]
+  orders        Order[]
+  reviews       Review[]
   sessions      Session[]
 }
 
@@ -76,203 +62,334 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-enum UserRole {
-  USER
-  ADMIN
+enum ComponentCategory {
+  CPU
+  GPU
+  RAM
+  STORAGE
+  MOTHERBOARD
+  PSU
+  CASE
+  COOLER
+  MONITOR
+  KEYBOARD
+  MOUSE
+  SPEAKERS
+  HEADPHONES
+  EXTERNAL_STORAGE
 }
 
-// Product models
 model Product {
-  id        String            @id @default(cuid())
-  name      String
-  description String?         // Optional product description
-  price     Float
-  stock     Int
-  category  ComponentCategory
-  image     String?          // URL or path to the product image
-  cpuSpec   CpuSpec?         @relation(fields: [cpuSpecId], references: [id])
-  gpuSpec   GpuSpec?         @relation(fields: [gpuSpecId], references: [id])
-  ramSpec   RamSpec?         @relation(fields: [ramSpecId], references: [id])
-  storageSpec StorageSpec?   @relation(fields: [storageSpecId], references: [id])
-  motherboardSpec MotherboardSpec? @relation(fields: [motherboardSpecId], references: [id])
-  psuSpec   PsuSpec?         @relation(fields: [psuSpecId], references: [id])
-  caseSpec  CaseSpec?        @relation(fields: [caseSpecId], references: [id])
-  coolerSpec CoolerSpec?     @relation(fields: [coolerSpecId], references: [id])
-  monitorSpec MonitorSpec?   @relation(fields: [monitorSpecId], references: [id])
-  keyboardSpec KeyboardSpec? @relation(fields: [keyboardSpecId], references: [id])
-  mouseSpec MouseSpec?       @relation(fields: [mouseSpecId], references: [id])
-  speakerSpec SpeakerSpec?   @relation(fields: [speakerSpecId], references: [id])
-  headphoneSpec HeadphoneSpec? @relation(fields: [headphoneSpecId], references: [id])
-  externalStorageSpec ExternalStorageSpec? @relation(fields: [externalStorageSpecId], references: [id])
-  cpuSpecId String?
-  gpuSpecId String?
-  ramSpecId String?
-  storageSpecId String?
-  motherboardSpecId String?
-  psuSpecId String?
-  caseSpecId String?
-  coolerSpecId String?
-  monitorSpecId String?
-  keyboardSpecId String?
-  mouseSpecId String?
-  speakerSpecId String?
-  headphoneSpecId String?
+  id                    String               @id @default(cuid())
+  sku                   String               @unique
+  name                  String
+  description           String?
+  price                 Float
+  stock                 Int
+  category              ComponentCategory
+  image                 String?
+  images                ProductImage[]
+  cpuSpecId             String?
+  gpuSpecId             String?
+  ramSpecId             String?
+  storageSpecId         String?
+  motherboardSpecId     String?
+  psuSpecId             String?
+  caseSpecId            String?
+  coolerSpecId          String?
+  monitorSpecId         String?
+  keyboardSpecId        String?
+  mouseSpecId           String?
+  speakerSpecId         String?
+  headphoneSpecId       String?
   externalStorageSpecId String?
-  updatedAt DateTime         @updatedAt
-  createdAt DateTime         @default(now())
+  updatedAt             DateTime             @updatedAt
+  createdAt             DateTime             @default(now())
+  orderItems            OrderItem[]
+  priceHistory          PriceHistory[]
+  externalStorageSpec   ExternalStorageSpec? @relation(fields: [externalStorageSpecId], references: [id])
+  headphoneSpec         HeadphoneSpec?       @relation(fields: [headphoneSpecId], references: [id])
+  speakerSpec           SpeakerSpec?         @relation(fields: [speakerSpecId], references: [id])
+  mouseSpec             MouseSpec?           @relation(fields: [mouseSpecId], references: [id])
+  keyboardSpec          KeyboardSpec?        @relation(fields: [keyboardSpecId], references: [id])
+  monitorSpec           MonitorSpec?         @relation(fields: [monitorSpecId], references: [id])
+  coolerSpec            CoolerSpec?          @relation(fields: [coolerSpecId], references: [id])
+  caseSpec              CaseSpec?            @relation(fields: [caseSpecId], references: [id])
+  psuSpec               PsuSpec?             @relation(fields: [psuSpecId], references: [id])
+  motherboardSpec       MotherboardSpec?     @relation(fields: [motherboardSpecId], references: [id])
+  storageSpec           StorageSpec?         @relation(fields: [storageSpecId], references: [id])
+  ramSpec               RamSpec?             @relation(fields: [ramSpecId], references: [id])
+  gpuSpec               GpuSpec?             @relation(fields: [gpuSpecId], references: [id])
+  cpuSpec               CpuSpec?             @relation(fields: [cpuSpecId], references: [id])
+  reviews               Review[]
+  tags                  TagsOnProducts[]
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  isMain    Boolean  @default(false)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
 }
 
 model CpuSpec {
-  id            String    @id @default(cuid())
-  brand         String
-  cores         Int
-  threads       Int
-  baseSpeed     Float
-  boostSpeed    Float?
-  socket        String
-  tdp          Int
-  products     Product[]
+  id         String    @id @default(cuid())
+  brand      String
+  cores      Int
+  threads    Int
+  baseSpeed  Float
+  boostSpeed Float?
+  socket     String
+  tdp        Int
+  products   Product[]
 }
 
 model GpuSpec {
-  id            String    @id @default(cuid())
-  brand         String
-  memory        Int
-  memoryType    String
-  coreClock     Float
-  boostClock    Float?
-  tdp          Int
-  products     Product[]
+  id         String    @id @default(cuid())
+  brand      String
+  memory     Int
+  memoryType String
+  coreClock  Float
+  boostClock Float?
+  tdp        Int
+  products   Product[]
 }
 
 model RamSpec {
-  id            String    @id @default(cuid())
-  capacity      Int
-  speed         Int
-  type          String
-  timing        String
-  products     Product[]
+  id       String    @id @default(cuid())
+  capacity Int
+  speed    Int
+  type     String
+  timing   String
+  products Product[]
 }
 
 model StorageSpec {
-  id            String    @id @default(cuid())
-  type          String    // SSD or HDD
-  capacity      Int
-  interface     String
-  readSpeed     Int?
-  writeSpeed    Int?
-  products     Product[]
+  id         String    @id @default(cuid())
+  type       String
+  capacity   Int
+  interface  String
+  readSpeed  Int?
+  writeSpeed Int?
+  products   Product[]
 }
 
 model MotherboardSpec {
-  id            String    @id @default(cuid())
-  socket        String
-  chipset       String
-  formFactor    String
-  memoryMax     Int
-  memorySlots   Int
-  products     Product[]
+  id          String    @id @default(cuid())
+  socket      String
+  chipset     String
+  formFactor  String
+  memoryMax   Int
+  memorySlots Int
+  products    Product[]
 }
 
 model PsuSpec {
-  id            String    @id @default(cuid())
-  wattage       Int
-  efficiency    String
-  modular       Boolean
-  products     Product[]
+  id         String    @id @default(cuid())
+  wattage    Int
+  efficiency String
+  modular    Boolean
+  products   Product[]
 }
 
 model CaseSpec {
-  id            String    @id @default(cuid())
-  formFactor    String
-  maxGpuLength  Int
-  maxCpuHeight  Int
+  id           String    @id @default(cuid())
+  formFactor   String
+  maxGpuLength Int
+  maxCpuHeight Int
   products     Product[]
 }
 
 model CoolerSpec {
-  id            String    @id @default(cuid())
-  type          String    // Air or Liquid
-  height        Int       // In millimeters
-  radiatorSize  Int?      // In millimeters (for liquid coolers)
-  fanSize       Int       // In millimeters
-  fanCount      Int
-  tdp           Int       // Maximum TDP support in watts
-  socket        String    // Supported CPU sockets
+  id           String    @id @default(cuid())
+  type         String
+  height       Int
+  radiatorSize Int?
+  fanSize      Int
+  fanCount     Int
+  tdp          Int
+  socket       String
   products     Product[]
 }
 
 model MonitorSpec {
-  id            String    @id @default(cuid())
-  size          Float     // Display size in inches
-  resolution    String    // e.g., "1920x1080"
-  refreshRate   Int       // in Hz
-  panelType     String    // e.g., IPS, VA, TN
-  responseTime  Float     // in ms
-  aspectRatio   String    // e.g., "16:9"
-  hdrSupport    Boolean   // Whether monitor supports HDR
-  ports         String    // JSON string of available ports
-  speakers      Boolean   // Built-in speakers
-  adjustable    Boolean   // Height/tilt adjustable
-  products      Product[]
+  id           String    @id @default(cuid())
+  size         Float
+  resolution   String
+  refreshRate  Int
+  panelType    String
+  responseTime Float
+  aspectRatio  String
+  hdrSupport   Boolean
+  ports        String
+  speakers     Boolean
+  adjustable   Boolean
+  products     Product[]
 }
 
 model KeyboardSpec {
-  id            String    @id @default(cuid())
-  type          String    // Mechanical, Membrane, etc.
-  layout        String    // Full-size, TKL, 60%, etc.
-  switchType    String?   // For mechanical keyboards
-  backlighting  Boolean   // Whether keyboard has backlighting
-  wireless      Boolean   // Wireless connectivity
-  numpad        Boolean   // Has numpad
-  multimedia    Boolean   // Has multimedia keys
-  products      Product[]
+  id           String    @id @default(cuid())
+  type         String
+  layout       String
+  switchType   String?
+  backlighting Boolean
+  wireless     Boolean
+  numpad       Boolean
+  multimedia   Boolean
+  products     Product[]
 }
 
 model MouseSpec {
-  id            String    @id @default(cuid())
-  dpi           Int       // Maximum DPI
-  buttons       Int       // Number of buttons
-  wireless      Boolean   // Wireless connectivity
-  sensor        String    // Sensor type
-  rgb          Boolean   // RGB lighting
-  weight        Int?      // Weight in grams
-  adjustable    Boolean   // Adjustable weight
-  products      Product[]
+  id         String    @id @default(cuid())
+  dpi        Int
+  buttons    Int
+  wireless   Boolean
+  sensor     String
+  rgb        Boolean
+  weight     Int?
+  adjustable Boolean
+  products   Product[]
 }
 
 model SpeakerSpec {
-  id            String    @id @default(cuid())
-  type          String    // 2.0, 2.1, 5.1, etc.
-  totalWattage  Int       // Total power output
-  wireless      Boolean   // Wireless connectivity
-  bluetooth     Boolean   // Bluetooth support
-  subwoofer     Boolean   // Includes subwoofer
-  remote        Boolean   // Includes remote control
-  products      Product[]
+  id           String    @id @default(cuid())
+  type         String
+  totalWattage Int
+  wireless     Boolean
+  bluetooth    Boolean
+  subwoofer    Boolean
+  remote       Boolean
+  products     Product[]
 }
 
 model HeadphoneSpec {
-  id            String    @id @default(cuid())
-  type          String    // Over-ear, In-ear, On-ear
-  driver        String    // Driver specifications
-  wireless      Boolean   // Wireless connectivity
-  bluetooth     Boolean   // Bluetooth support
-  noiseCancelling Boolean // Active noise cancellation
-  microphone    Boolean   // Has microphone
-  impedance     Int?      // Impedance in ohms
-  frequency     String    // Frequency response range
-  products      Product[]
+  id              String    @id @default(cuid())
+  type            String
+  driver          String
+  wireless        Boolean
+  bluetooth       Boolean
+  noiseCancelling Boolean
+  microphone      Boolean
+  impedance       Int?
+  frequency       String
+  products        Product[]
 }
 
 model ExternalStorageSpec {
+  id         String    @id @default(cuid())
+  capacity   Int
+  type       String
+  interface  String
+  portable   Boolean
+  encrypted  Boolean
+  readSpeed  Int?
+  writeSpeed Int?
+  products   Product[]
+}
+
+model Tag {
+  id        String           @id @default(cuid())
+  name      String           @unique
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  products  TagsOnProducts[]
+}
+
+model TagsOnProducts {
+  productId  String
+  tagId      String
+  assignedAt DateTime @default(now())
+  tag        Tag      @relation(fields: [tagId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
+
+  @@id([productId, tagId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String
+  productId String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@index([userId])
+}
+
+model PriceHistory {
+  id        String   @id @default(cuid())
+  productId String
+  price     Float
+  date      DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+}
+
+model Address {
   id            String    @id @default(cuid())
-  capacity      Int       // Storage capacity in GB
-  type          String    // HDD or SSD
-  interface     String    // USB 3.0, USB-C, etc.
-  portable      Boolean   // Portable or Desktop
-  encrypted     Boolean   // Hardware encryption support
-  readSpeed     Int?      // Read speed in MB/s
-  writeSpeed    Int?      // Write speed in MB/s
-  products      Product[]
+  userId        String
+  type          String    // SHIPPING, BILLING, or BOTH
+  name          String
+  line1         String
+  line2         String?
+  city          String
+  state         String
+  postalCode    String
+  country       String
+  phone         String
+  isDefault     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user          User      @relation(fields: [userId], references: [id])
+  shippedOrders Order[]   @relation("ShippingAddress")
+  billedOrders  Order[]   @relation("BillingAddress")
+
+  @@index([userId])
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  userId           String
+  status           String      @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+  totalAmount      Float
+  paymentStatus    String      @default("PENDING") // PENDING, PAID, FAILED, REFUNDED, CANCELLED
+  paymentMethod    String      @default("RAZORPAY")
+  paymentId        String?     // Razorpay payment ID
+  paymentSignature String?     // Razorpay payment signature
+  trackingNumber   String?
+  shippingAddressId String
+  billingAddressId  String
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  user             User        @relation(fields: [userId], references: [id])
+  items            OrderItem[]
+  shippingAddress  Address     @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddress   Address     @relation("BillingAddress", fields: [billingAddressId], references: [id])
+
+  @@index([userId])
+  @@index([shippingAddressId])
+  @@index([billingAddressId])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  product   Product @relation(fields: [productId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
 }

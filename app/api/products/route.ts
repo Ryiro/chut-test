@@ -1,10 +1,32 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { ComponentCategory, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { ComponentCategory, COMPONENT_CATEGORIES } from "@/types/product";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    // Generate or use provided SKU
+    let sku = body.sku;
+    if (!sku) {
+      const timestamp = Date.now();
+      const categoryPrefix = body.category.substring(0, 3).toUpperCase();
+      const namePrefix = body.name.substring(0, 3).toUpperCase();
+      sku = `${categoryPrefix}-${namePrefix}-${timestamp}`;
+    }
+
+    // Verify SKU uniqueness
+    const existingSku = await db.product.findUnique({
+      where: { sku }
+    });
+
+    if (existingSku) {
+      return NextResponse.json(
+        { error: 'SKU already exists' },
+        { status: 400 }
+      );
+    }
 
     // Create the specific spec based on category
     let specId = null;
@@ -199,6 +221,7 @@ export async function POST(req: Request) {
     // Create the product with the associated spec
     const product = await db.product.create({
       data: {
+        sku,
         name: body.name,
         description: body.description,
         price: parseFloat(body.price),
@@ -248,7 +271,7 @@ export async function GET(request: Request) {
     const where: Prisma.ProductWhereInput = {};
 
     // Category filter
-    if (category && Object.values(ComponentCategory).includes(category as ComponentCategory)) {
+    if (category && Object.values(COMPONENT_CATEGORIES).includes(category as ComponentCategory)) {
       where.category = category as ComponentCategory;
     }
 

@@ -6,12 +6,28 @@ import GoogleProvider from "next-auth/providers/google";
 import DiscordProvider from "next-auth/providers/discord";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { Adapter } from "next-auth/adapters";
-import NextAuth from "next-auth";
+import NextAuth, { DefaultSession } from "next-auth";
+
+type UserRole = 'USER' | 'ADMIN';
 
 declare module "next-auth" {
   interface User {
     id?: string;
-    role: "USER" | "ADMIN";
+    role: UserRole;
+    phone?: string | null;
+  }
+
+  interface Session extends DefaultSession {
+    user: {
+      id: string;
+      role: UserRole;
+      phone?: string | null;
+    } & DefaultSession["user"]
+  }
+
+  interface JWT {
+    id?: string;
+    role?: UserRole;
     phone?: string | null;
   }
 }
@@ -47,6 +63,15 @@ export const authOptions: NextAuthConfig = {
         const user = await db.user.findUnique({
           where: {
             email: credentials.email as string
+          },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            password: true,
+            image: true,
+            role: true,
+            phone: true
           }
         });
 
@@ -68,7 +93,7 @@ export const authOptions: NextAuthConfig = {
           email: user.email,
           name: user.name,
           image: user.image,
-          role: user.role,
+          role: user.role as UserRole,
           phone: user.phone,
         };
       }
@@ -78,7 +103,7 @@ export const authOptions: NextAuthConfig = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = token.role as "USER" | "ADMIN";
+        session.user.role = token.role as UserRole;
         session.user.phone = token.phone as string | null;
       }
       return session;

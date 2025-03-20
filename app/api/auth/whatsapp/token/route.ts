@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { signIn } from "@/lib/auth";
+import * as jose from 'jose';
 
 export async function POST(req: Request) {
   try {
@@ -64,31 +64,41 @@ export async function POST(req: Request) {
       });
     }
 
-    try {
-      // Sign in with credentials
-      const signInResult = await signIn("credentials", {
-        redirect: false,
-        id: user.id,
-        phone: formattedPhone,
-      });
-
-      if (signInResult?.error) {
-        throw new Error(signInResult.error);
-      }
-
-      return NextResponse.json({ 
-        success: true, 
-        message: "Authentication successful" 
-      });
-    } catch (error) {
-      console.error("[WHATSAPP_SIGNIN_ERROR]", error);
-      throw error;
-    }
+    return NextResponse.json({ 
+      success: true, 
+      message: "Authentication successful",
+      user
+    });
   } catch (error) {
     console.error("[WHATSAPP_TOKEN_ERROR]", error);
     return NextResponse.json(
       { error: "Authentication failed" },
       { status: 500 }
     );
+  }
+}
+
+export async function GET(req: Request) {
+  const token = req.url.split('token=')[1];
+  if (!token) {
+    return new NextResponse('Token not found', { status: 400 });
+  }
+
+  try {
+    const payload = await jose.jwtVerify(token, new TextEncoder().encode(process.env.NEXTAUTH_SECRET!));
+    
+    // Use the payload to find the user
+    const user = await db.user.findUnique({
+      where: { id: payload.payload.sub as string }
+    });
+
+    if (!user) {
+      return new NextResponse('User not found', { status: 404 });
+    }
+
+    return NextResponse.json({ user });
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    return new NextResponse('Invalid token', { status: 400 });
   }
 }
